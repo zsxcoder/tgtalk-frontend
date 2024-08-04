@@ -24,6 +24,15 @@
             <template v-else-if="imgUrl"><img v-lazy="imgUrl" /></template>
           </div>
         </div>
+        <template v-if="talkConfig.custom.emaction.enable">
+          <emactionExpress
+            :availableArrayString="talkConfig.custom.emaction.availableArrayString"
+            :endpoint="talkConfig.custom.emaction.endpoint"
+            :reactTargetId="channelData.id"
+            :theme="talkConfig.custom.emaction.theme"
+            :threeDimensional="talkConfig.custom.emaction.threeDimensional"
+          />
+        </template>
         <div class="talk-time">{{ channelData.time }}</div>
       </div>
       <template v-if="nextBefore">
@@ -46,6 +55,8 @@ import { ref, onMounted } from "vue";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import imageZoom from "./components/imageZoom.vue";
+import emactionExpress from "./components/emactionExpress.vue";
+import { baseAssets } from "./shared/baseAssets";
 
 const props = defineProps({
   config: Object,
@@ -59,40 +70,17 @@ const talkConfig = {
     proxy: {
       image: false,
     },
+    emaction: {
+      enable: false,
+      endpoint: "https://api.emaction.cool",
+      theme: "system",
+      availableArrayString: "\uD83D\uDC4D,thumbs-up;\uD83D\uDE04,smile-face;\uD83C\uDF89,party-popper;\uD83D\uDE15,confused-face;❤️,red-heart;\uD83D\uDE80,rocket;\uD83D\uDC40,eyes;\uD83D\uDC4E,thumbs-down;",
+      threeDimensional: false,
+    },
   },
 };
 
-const loadLyrics = [
-  "Chipi，",
-  "chipi，",
-  "chapa，",
-  "chapa\n",
-  "Dubi，",
-  "dubi，",
-  "daba，",
-  "daba\n",
-  "Mágico，",
-  "mi，",
-  "dubi，",
-  "dubi\n",
-  "boom，",
-  "boom，",
-  "boom，",
-  "boom\n",
-  "Chipi，",
-  "chipi，",
-  "chapa，",
-  "chapa\n",
-  "Dubi，",
-  "dubi，",
-  "daba，",
-  "daba\n",
-  "Mágico，",
-  "mi，",
-  "dubi，",
-  "dubi\n",
-  "booooooooooooooom\n",
-];
+const loadLyrics = baseAssets.loadingLyric;
 
 let chip = 0;
 
@@ -190,6 +178,7 @@ onMounted(() => {
 .talk-package > .talk-time {
   margin-left: auto;
   margin-top: auto;
+  margin-top: 0.3rem;
 }
 .talk-package > .talk-id {
   margin-left: auto;
@@ -203,6 +192,9 @@ onMounted(() => {
   font-style: normal !important;
   background-image: none !important;
   background: none !important;
+}
+.talk-package > .emactionExpress {
+  margin-top: 0.3rem;
 }
 .center {
   display: block;

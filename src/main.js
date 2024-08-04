@@ -1,7 +1,8 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import lazyPlugin from "vue3-lazy";
-import { baseAssets } from "./shared/baseAssets";
+import error from "../assets/cross_mark_3d.png?inline";
+import loading from "../assets/loading_gray.png?inline";
 
 class tgTalker {
   constructor({ serverUrl, selector, zoom, custom }) {
@@ -17,8 +18,8 @@ class tgTalker {
     if (mountContainer) {
       this.app = createApp(App, { config: this.getConfig() });
       this.app.use(lazyPlugin, {
-        loading: baseAssets.loading,
-        error: baseAssets.error,
+        loading: loading,
+        error: error,
       });
       this.app.mount(mountContainer);
       return true;

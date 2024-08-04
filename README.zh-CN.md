@@ -32,7 +32,7 @@
 ```html
 <html>
   <head>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css" />
   </head>
   <body>
     ...
@@ -40,6 +40,7 @@
     <div id="talk-container"></div>
     <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
     <script>
       const talker = new tgTalker({
         serverUrl: "https://dev-tgtalk.floatsheep.workers.dev/", // API

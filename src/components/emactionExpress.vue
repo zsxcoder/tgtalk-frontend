@@ -1,100 +1,104 @@
 <template>
-  <div
-    ref="rootElement"
-    :class="containerClass"
-    style="
-      flex-wrap: nowrap;
-      max-width: 100%;
-      display: flex;
-      gap: 0.375rem;
-      height: 1.5rem;
-    "
-    :style="{ fontFamily: fontFamily }"
-  >
-    <div style="position: relative; user-select: none; display: flex">
-      <div
-        id="start-smile"
-        @click="showAvailable = !showAvailable"
-        style="
-          display: flex;
-          align-self: center;
-          border-radius: 800px;
-          width: 1rem;
-          height: 1rem;
-          line-height: 1rem;
-          padding: 0.25rem;
-        "
-        :style="startSmileStyle"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          width="1rem"
-          height="1rem"
-          id="start-smile-svg"
-          style="cursor: pointer"
-          :style="startSmileSvgStyle"
+  <div class="emactionExpress">
+    <div
+      ref="rootElement"
+      :class="containerClass"
+      style="
+        flex-wrap: nowrap;
+        max-width: 100%;
+        display: flex;
+        gap: 0.375rem;
+        height: 1.5rem;
+      "
+      :style="{ fontFamily: fontFamily }"
+    >
+      <div style="position: relative; user-select: none; display: flex">
+        <div
+          id="start-smile"
+          @click="showAvailable = !showAvailable"
+          style="
+            display: flex;
+            align-self: center;
+            border-radius: 800px;
+            width: 1rem;
+            height: 1rem;
+            line-height: 1rem;
+            padding: 0.25rem;
+          "
+          :style="startSmileStyle"
         >
-          <path
-            d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm3.82 1.636a.75.75 0 0 1 1.038.175l.007.009c.103.118.22.222.35.31.264.178.683.37 1.285.37.602 0 1.02-.192 1.285-.371.13-.088.247-.192.35-.31l.007-.008a.75.75 0 0 1 1.222.87l-.022-.015c.02.013.021.015.021.015v.001l-.001.002-.002.003-.005.007-.014.019a2.066 2.066 0 0 1-.184.213c-.16.166-.338.316-.53.445-.63.418-1.37.638-2.127.629-.946 0-1.652-.308-2.126-.63a3.331 3.331 0 0 1-.715-.657l-.014-.02-.005-.006-.002-.003v-.002h-.001l.613-.432-.614.43a.75.75 0 0 1 .183-1.044ZM12 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM5 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm5.25 2.25.592.416a97.71 97.71 0 0 0-.592-.416Z"
-          ></path>
-        </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            width="1rem"
+            height="1rem"
+            id="start-smile-svg"
+            style="cursor: pointer"
+            :style="startSmileSvgStyle"
+          >
+            <path
+              d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm3.82 1.636a.75.75 0 0 1 1.038.175l.007.009c.103.118.22.222.35.31.264.178.683.37 1.285.37.602 0 1.02-.192 1.285-.371.13-.088.247-.192.35-.31l.007-.008a.75.75 0 0 1 1.222.87l-.022-.015c.02.013.021.015.021.015v.001l-.001.002-.002.003-.005.007-.014.019a2.066 2.066 0 0 1-.184.213c-.16.166-.338.316-.53.445-.63.418-1.37.638-2.127.629-.946 0-1.652-.308-2.126-.63a3.331 3.331 0 0 1-.715-.657l-.014-.02-.005-.006-.002-.003v-.002h-.001l.613-.432-.614.43a.75.75 0 0 1 .183-1.044ZM12 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM5 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm5.25 2.25.592.416a97.71 97.71 0 0 0-.592-.416Z"
+            ></path>
+          </svg>
+        </div>
+        <div
+          class="anim-scale-in reaction-available-popup"
+          @click="closePopup"
+          :style="{ display: showAvailable ? 'flex' : 'none' }"
+          style="
+            user-select: none;
+            position: absolute;
+            top: -3rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            padding: 0 0.125rem;
+          "
+        >
+          <span
+            v-for="item in availableReactions"
+            :key="item.reaction_name"
+            @click="react(item.reaction_name)"
+            :class="[
+              'reaction-available-emoji',
+              { 'reaction-available-emoji-reacted': item.meReacted },
+            ]"
+            style="
+              cursor: pointer;
+              margin: 0.25rem 0.125rem;
+              padding: 0.25rem;
+              border-radius: 0.375rem;
+            "
+          >
+            {{ item.emoji }}
+          </span>
+        </div>
       </div>
-      <div
-        class="anim-scale-in reaction-available-popup"
-        @click="closePopup"
-        :style="{ display: showAvailable ? 'flex' : 'none' }"
-        style="
-          user-select: none;
-          position: absolute;
-          top: -3rem;
-          font-size: 0.875rem;
-          border-radius: 0.375rem;
-          padding: 0 0.125rem;
-        "
-      >
-        <span
+      <div style="display: flex; gap: 0.375rem">
+        <div
           v-for="item in availableReactions"
           :key="item.reaction_name"
           @click="react(item.reaction_name)"
           :class="[
-            'reaction-available-emoji',
-            { 'reaction-available-emoji-reacted': item.meReacted },
+            item.meReacted
+              ? 'reaction-got-reacted'
+              : 'reaction-got-not-reacted',
           ]"
+          :style="{ display: item.count && item.count > 0 ? 'flex' : 'none' }"
           style="
+            user-select: none;
             cursor: pointer;
-            margin: 0.25rem 0.125rem;
-            padding: 0.25rem;
-            border-radius: 0.375rem;
+            justify-content: center;
+            align-items: center;
+            border-radius: 108px;
+            padding: 0 0.25rem;
+            font-size: 0.75rem;
           "
         >
-          {{ item.emoji }}
-        </span>
-      </div>
-    </div>
-    <div style="display: flex; gap: 0.375rem">
-      <div
-        v-for="item in availableReactions"
-        :key="item.reaction_name"
-        @click="react(item.reaction_name)"
-        :class="[
-          item.meReacted ? 'reaction-got-reacted' : 'reaction-got-not-reacted',
-        ]"
-        :style="{ display: item.count && item.count > 0 ? 'flex' : 'none' }"
-        style="
-          user-select: none;
-          cursor: pointer;
-          justify-content: center;
-          align-items: center;
-          border-radius: 108px;
-          padding: 0 0.25rem;
-          font-size: 0.75rem;
-        "
-      >
-        <span style="pointer-events: none">{{ item.emoji }}</span
-        ><span style="padding: 0 0.375rem; pointer-events: none">{{
-          item.count
-        }}</span>
+          <span style="pointer-events: none">{{ item.emoji }}</span
+          ><span style="padding: 0 0.375rem; pointer-events: none">{{
+            item.count
+          }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -114,7 +118,7 @@ const props = defineProps({
   },
   endpoint: {
     type: String,
-    default: "https://api.emaction.cool",
+    default: "",
   },
   reactTargetId: {
     type: String,
@@ -131,7 +135,9 @@ const props = defineProps({
   },
 });
 
-const fontFamily = computed(() => props.threeDimensional ? "Emoji Font" : "system-ui");
+const fontFamily = computed(() =>
+  props.threeDimensional ? "Emoji Font" : "system-ui"
+);
 
 const showAvailable = ref(false);
 const availableReactions = ref([]);

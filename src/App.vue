@@ -3,7 +3,6 @@
     <div id="talk-wrapper">
       <div
         class="talk-package"
-        :id="`talk-package-${channelData.id}`"
         v-for="channelData in talkData.ChannelMessageData"
         :key="channelData.id"
       >
@@ -16,17 +15,16 @@
             :key="imgUrl"
           >
             <template v-if="talkConfig.zoom && imgUrl"
-              ><imageZoom
-                :imgUrl="imgUrl"
-                :src="imgUrl"
-                :options="{ container: null }"
-            /></template>
+              ><img v-lazy="imgUrl" :src="imgUrl" v-viewer />
+            </template>
             <template v-else-if="imgUrl"><img v-lazy="imgUrl" /></template>
           </div>
         </div>
         <template v-if="talkConfig.custom.emaction.enable">
           <emactionExpress
-            :availableArrayString="talkConfig.custom.emaction.availableArrayString"
+            :availableArrayString="
+              talkConfig.custom.emaction.availableArrayString
+            "
             :endpoint="talkConfig.custom.emaction.endpoint"
             :reactTargetId="channelData.id"
             :theme="talkConfig.custom.emaction.theme"
@@ -52,9 +50,6 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
-import imageZoom from "./components/imageZoom.vue";
 import emactionExpress from "./components/emactionExpress.vue";
 import { baseAssets } from "./shared/baseAssets";
 
@@ -68,13 +63,14 @@ const talkConfig = {
   zoom: props.config.zoom || false,
   custom: props.config.custom || {
     proxy: {
+      proxyUrl: props.config.serverUrl,
       image: false,
     },
     emaction: {
       enable: false,
-      endpoint: "https://api.emaction.cool",
-      theme: "system",
-      availableArrayString: "\uD83D\uDC4D,thumbs-up;\uD83D\uDE04,smile-face;\uD83C\uDF89,party-popper;\uD83D\uDE15,confused-face;❤️,red-heart;\uD83D\uDE80,rocket;\uD83D\uDC40,eyes;\uD83D\uDC4E,thumbs-down;",
+      endpoint: "",
+      theme: "",
+      availableArrayString: "",
       threeDimensional: false,
     },
   },
@@ -96,11 +92,6 @@ const talkData = ref(null);
 const error = ref(null);
 const nextBefore = ref(null);
 
-marked.use({
-  gfm: true,
-  breaks: false,
-});
-
 const fetchData = async (isNext) => {
   try {
     let response;
@@ -112,7 +103,7 @@ const fetchData = async (isNext) => {
     const data = await response.json();
     nextBefore.value = data.nextBefore;
     data.ChannelMessageData.map((e) => {
-      e.text = DOMPurify.sanitize(marked.parse(e.text)).replace(
+      e.text = e.text.replace(
         /<a[^>]*?(#SFCN|href="[^"]*SFCN[^"]*")[^>]*>.*?<\/a>/gi,
         ""
       );
@@ -120,7 +111,7 @@ const fetchData = async (isNext) => {
         let returnTag = talkConfig.custom.proxy.image
           ? imgTag.replace(
               /(https:\/\/cdn\d*\.cdn-telegram\.org\/file\/[^"]+)/g,
-              `${talkConfig.serverUrl}?proxy=$1`
+              `${talkConfig.custom.proxy.proxyUrl}/?proxy=$1`
             )
           : imgTag;
         returnTag = returnTag.replace(
@@ -129,10 +120,9 @@ const fetchData = async (isNext) => {
         );
         return returnTag;
       });
-
       e.time = new Date(e.time).toLocaleString();
-      return e;
     });
+
     isNext
       ? data.ChannelMessageData.map((e) =>
           talkData.value.ChannelMessageData.push(e)
@@ -161,6 +151,9 @@ onMounted(() => {
   padding: 1rem;
   align-items: flex-start;
   flex-wrap: wrap;
+  word-wrap: break-word;
+  word-break: break-all;
+  line-height: normal;
 }
 .talk-package > .talk-img-list > .talk-img img {
   max-width: 50%;
@@ -178,7 +171,7 @@ onMounted(() => {
 .talk-package > .talk-time {
   margin-left: auto;
   margin-top: auto;
-  margin-top: 0.3rem;
+  margin-top: 0.5rem;
 }
 .talk-package > .talk-id {
   margin-left: auto;
@@ -188,13 +181,17 @@ onMounted(() => {
 .talk-package > .talk-text {
   width: 100%;
 }
+.talk-package > .talk-text pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
 .talk-package > .talk-text i.emoji {
   font-style: normal !important;
   background-image: none !important;
   background: none !important;
 }
 .talk-package > .emactionExpress {
-  margin-top: 0.3rem;
+  margin-top: 0.5rem;
 }
 .center {
   display: block;
@@ -213,5 +210,60 @@ onMounted(() => {
   background-color: #06c;
   color: #fff;
   cursor: default;
+}
+.shady {
+  color: #000;
+  background-color: #000;
+  transition: 0.1s;
+  border-radius: 10.1%;
+  border-radius: 0.3rem !important;
+  padding: 0.2rem;
+  -webkit-transition: 0.1s;
+  -moz-transition: 0.1s;
+  -ms-transition: 0.1s;
+  -o-transition: 0.1s;
+  -webkit-border-radius: 10.1%;
+  -moz-border-radius: 10.1%;
+  -ms-border-radius: 10.1%;
+  -o-border-radius: 10.1%;
+}
+
+.shady s {
+  opacity: 0;
+  transition: 0.1s;
+  -webkit-transition: 0.1s;
+  -moz-transition: 0.1s;
+  -ms-transition: 0.1s;
+  -o-transition: 0.1s;
+}
+
+.shady:hover {
+  color: #fff;
+  border-radius: 10.1%;
+  text-shadow: 0 0 5px #fff, 0 0 5px #fff;
+  transition: 0.1s;
+  -webkit-transition: 0.1s;
+  -moz-transition: 0.1s;
+  -ms-transition: 0.1s;
+  -o-transition: 0.1s;
+  -webkit-border-radius: 10.1%;
+  -moz-border-radius: 10.1%;
+  -ms-border-radius: 10.1%;
+  -o-border-radius: 10.1%;
+}
+
+.shady:hover s {
+  opacity: 1;
+  border-radius: 10.1%;
+  text-shadow: 0 0 5px #fff, 0 0 5px #fff;
+  transition: 0.1s;
+  -webkit-transition: 0.1s;
+  -moz-transition: 0.1s;
+  -ms-transition: 0.1s;
+  -o-transition: 0.1s;
+  -webkit-border-radius: 10.1%;
+  -moz-border-radius: 10.1%;
+  -ms-border-radius: 10.1%;
+  -o-border-radius: 10.1%;
 }
 </style>

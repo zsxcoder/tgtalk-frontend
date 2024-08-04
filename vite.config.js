@@ -13,13 +13,15 @@ export default defineConfig({
         buildOptions: {
           rollupOptions: {
             external: ["vue"],
-            output: { globals: { vue: "Vue" } },
+            output: { globals: { vue: "Vue" }, exports: "named" },
           },
           lib: {
             entry: path.resolve(__dirname, "src/main.js"),
             name: "tgTalker",
             fileName: (format) => `tgTalker.${format}.js`,
           },
+          sourcemap: true,
+          minify: true,
         },
       },
     }),

@@ -8,7 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist # 注释掉更好测试
+dist/*
+dist
+dist/*.js
 dist-ssr
 *.local
 
@@ -27,3 +29,7 @@ dist-ssr
 .env.local
 es/*
 lib/*
+dist/tgTalker.umd.js
+dist/tgTalker.es.js
+dist/index.html
+dist/style.css

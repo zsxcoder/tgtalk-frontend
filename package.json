@@ -9,9 +9,8 @@
     "purge": "cnpm sync @floatsheep/tg-talker"
   },
   "dependencies": {
-    "dompurify": "^3.1.6",
-    "marked": "^13.0.3",
-    "medium-zoom": "^1.1.0",
+    "v-viewer": "^3.0.11",
+    "viewerjs": "^1.11.6",
     "vue": "^3.4.31",
     "vue3-lazy": "1.0.0-alpha.1"
   },

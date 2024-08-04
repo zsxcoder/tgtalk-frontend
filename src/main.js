@@ -1,8 +1,10 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import lazyPlugin from "vue3-lazy";
-import error from "../assets/cross_mark_3d.png?inline";
-import loading from "../assets/loading_gray.png?inline";
+import VueViewer from "v-viewer";
+import "viewerjs/dist/viewer.css";
+import error from "../assets/cross_mark_3d.webp?inline";
+import loading from "../assets/loading_gray.webp?inline";
 
 class tgTalker {
   constructor({ serverUrl, selector, zoom, custom }) {
@@ -18,8 +20,15 @@ class tgTalker {
     if (mountContainer) {
       this.app = createApp(App, { config: this.getConfig() });
       this.app.use(lazyPlugin, {
-        loading: loading,
-        error: error,
+        loading,
+        error,
+      });
+      this.app.use(VueViewer, {
+        defaultOptions: {
+          title: false,
+          toolbar: false,
+          navbar: false,
+        },
       });
       this.app.mount(mountContainer);
       return true;

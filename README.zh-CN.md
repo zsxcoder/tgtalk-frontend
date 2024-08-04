@@ -43,7 +43,7 @@
     <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
     <script>
       const talker = new tgTalker({
-        serverUrl: "https://dev-tgtalk.floatsheep.workers.dev/", // API
+        serverUrl: "https://dev-tgtalk.floatsheep.workers.dev", // API
         selector: "#talk-container", // 显示内容的容器
         zoom: true, // 是否启用图片缩放
       });

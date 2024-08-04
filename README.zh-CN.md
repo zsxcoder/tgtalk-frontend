@@ -43,7 +43,7 @@
     <script>
       const talker = new tgTalker({
         serverUrl: "https://dev-tgtalk.floatsheep.workers.dev/", // API
-        selector: "#app", // 显示内容的容器
+        selector: "#talk-container", // 显示内容的容器
         zoom: true, // 是否启用图片缩放
       });
       talker.init(); // 在容器中注入 talker
@@ -51,6 +51,8 @@
   </body>
 </html>
 ```
+
+配置详见：[配置解析](CONFIG.md)
 
 ## 项目依赖
 

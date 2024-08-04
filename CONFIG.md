@@ -63,13 +63,15 @@ new tgTalker({
 ```
 
 - `zoom` 是一个布尔值（Boolean），你可以选择为 `true` 或 `false` 来启用图片放大功能。
+
 - `custom` 是一个配置对象（Object），你需要在其中写入其他配置。
 
   **必须注意的是，如果你不想启用 `custom` 下的所有功能，你必须从配置中删除 `custom` 对象**。
 
   - `proxy` 是一个配置对象（Object），你可以在其中配置代理。
 
-    - `proxyUrl` 是一个字符串（String），你可以在其中配置图片代理服务器（**此配置项的末尾不能出现 `/`**）。
+    - `proxyUrl` 是一个字符串（String），你可以在其中配置图片代理服务器（**此配置项的末尾不能出现 `/`**），你也可以配置为与 `serverUrl` 相同的值（因为 API 中附带了图片代理功能）
+
     - `image` 是一个布尔值（Boolean），你可以选择为 `true` 或 `false` 来启用图片代理功能，当此为 `false` 时，`proxyUrl` 配置不生效。
 
   - `emaction` 是一个配置对象（Object），你可以在其中配置 `emaction` 相关配置。
@@ -84,6 +86,6 @@ new tgTalker({
 
     - `threeDimensional` 是一个布尔值（Boolean），你可以选择为 `true` 或 `false` 来启用 3D Emoji 功能，当选择为 `true` 后，**会引入一个自定义字体，并可能引发 CSP 问题和版权问题**，此逻辑将会在 `2.0.0-alpha2` 中更改。
 
-**注：在本项目中，`emaction` 的 `reactTargetId` 被标记为 `channelData.id`，如果多人使用一个 `emaction` API，且同时使用本项目，可能会引发评价信息冲突。**
+**注：在本项目中，`emaction` 的 `reactTargetId` 被标记为 `channelData.id`，如果多人使用一个 `emaction` API，且同时使用本项目，可能会引发评价信息冲突，此逻辑将会在 `2.0.0-alpha2` 中更改**
 
 [1]: https://github.com/emaction/emaction.frontend?tab=readme-ov-file

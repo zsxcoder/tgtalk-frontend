@@ -153,10 +153,9 @@ onMounted(() => {
   flex-wrap: wrap;
   word-wrap: break-word;
   word-break: break-all;
-  line-height: normal;
+  line-height: unset;
 }
 .talk-package > .talk-img-list > .talk-img img {
-  max-width: 50%;
   object-fit: contain;
   max-height: 92%;
   margin: 5px;

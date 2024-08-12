@@ -177,7 +177,7 @@ const addFontFace = () => {
         font-family: "Emoji Font";
         src: url("https://registry.npmmirror.com/@floatsheep/font/1.0.6/files/seguiemj.woff2");
       }
-      :root {
+      .emactionExpress {
         font-family: "Emoji Font";
       }
     `;

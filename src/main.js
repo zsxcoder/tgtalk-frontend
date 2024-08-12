@@ -1,8 +1,8 @@
-import { createApp } from "vue";
 import App from "./App.vue";
-import lazyPlugin from "vue3-lazy";
+import { createApp } from "vue";
 import VueViewer from "v-viewer";
 import "viewerjs/dist/viewer.css";
+import lazyPlugin from "vue3-lazy";
 import error from "../assets/cross_mark_3d.webp?inline";
 import loading from "../assets/loading_gray.webp?inline";
 

@@ -17,6 +17,7 @@ new tgTalker({
 **必选**：
 
 - `serverUrl` 是一个字符串（String），你需要在其中传入 API 地址（**注意，末尾不需要加 `/`**）。
+
 - `selector` 是一个字符串（String），你需要在其中传入一个元素选择器。
 
 假设你的 HTML 结构如下：
@@ -84,8 +85,8 @@ new tgTalker({
 
     - `availableArrayString` 是一个字符串（String），你可以配置 `emaction` 的 emoji 列表，留空时为默认列表（`👍,thumbs-up;😄,smile-face;🎉,party-popper;😕,confused-face;❤️,red-heart;🚀,rocket;👀,eyes;`），具体配置可以查看 [emaction/emaction.frontend - 进阶配置][1]。
 
-    - `threeDimensional` 是一个布尔值（Boolean），你可以选择为 `true` 或 `false` 来启用 3D Emoji 功能，当选择为 `true` 后，**会引入一个自定义字体，并可能引发 CSP 问题和版权问题**，此逻辑将会在 `2.0.0-alpha2` 中更改。
+    - `threeDimensional` 是一个布尔值（Boolean），你可以选择为 `true` 或 `false` 来启用 3D Emoji 功能，当选择为 `true` 后，**会引入一个自定义字体，并可能引发 CSP 问题**
 
-**注：在本项目中，`emaction` 的 `reactTargetId` 被标记为 `channelData.id`，如果多人使用一个 `emaction` API，且同时使用本项目，可能会引发评价信息冲突，此逻辑将会在 `2.0.0-alpha2` 中更改**
+**注：在本项目中，为了避免 `emaction` 的 冲突，`reactTargetId` 将会被标记为 `tgtalk-evaluate-id-channelData.id`**
 
 [1]: https://github.com/emaction/emaction.frontend?tab=readme-ov-file

@@ -1,8 +1,55 @@
-[English](README.md) | 中文（简体）
+# TGTalk-Frontend
+
+中文（简体）| [English](README.md)
 
 ## TL;DR
 
-开发中，待完成
+1. **部署 API**
+
+   - 参阅 [API 部署](API_DEPLOY.zh-CN.md)
+
+2. **部署前端**
+
+   - 使用 CDN 部署项目
+
+   - 引入样式文件和 Vue.js
+
+   - 在 HTML 中添加显示内容的容器
+
+   - 引入并初始化 `tgTalker`
+
+3. **示例代码**
+
+   ```html
+   <html>
+     <head>
+       <!--样式文件-->
+       <link
+         rel="stylesheet"
+         href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css"
+       />
+     </head>
+     <body>
+       ...
+       <!--显示内容的容器-->
+       <div id="talk-container"></div>
+       <!--显式引用 Vue.js-->
+       <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+       <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
+       <script>
+         const talker = new tgTalker({
+           serverUrl: "https://dev-tgtalk.floatsheep.workers.dev", // API
+           selector: "#talk-container", // 显示内容的容器
+           zoom: true, // 是否启用图片缩放
+         });
+         talker.init(); // 在容器中注入 talker
+       </script>
+     </body>
+   </html>
+   ```
+
+4. **配置**
+   - 详见：[配置解析](CONFIG.md)
 
 ## 关于分支
 
@@ -15,15 +62,18 @@
 同时，本项目的 `umd` 格式文件打包体积与 v1 相比，减少了 ~54% 的包体积
 
 > 在 `TGTalk-Frontend` v2 中，已不再提供 `Markdown` 的渲染支持
+>
 > 因为 Telegram 默认会渲染 `Markdown`，但本项目会处理一些 Telegram 的特殊标签
 
 > 在 `TGTalk-Frontend` v2 中，已不再支持自定义模板
+>
+> 如有需要，可以克隆本项目进行自定义
 
 ## 如何使用
 
 首先，你需要部署 `API`。
 
-你**只需要使用 Cloudflare Worker** 部署它，很简单
+参阅 [API 部署](API_DEPLOY.zh-CN.md)
 
 第二，你需要在网站上部署前端
 
@@ -32,7 +82,11 @@
 ```html
 <html>
   <head>
-    <link rel="stylesheet" href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css" />
+    <!--样式文件-->
+    <link
+      rel="stylesheet"
+      href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css"
+    />
   </head>
   <body>
     ...
@@ -58,10 +112,17 @@
 ## 项目依赖
 
 - 前端框架： **Vue.js**
+
 - 构建工具： **Vite**
+
 - 懒加载： **vue3-lazy**
+
 - 类 GitHub 评价：**emaction**
+
   - 由于 **emaction** 默认前端使用 **Web Components** 技术，考虑到兼容性问题，本项目中将其**转换**为 Vue SFC
+
     - 仅作 **转换** 并继承 bug
+
 - 图片缩放：**v-viewer**
+
 - 后端 API：在 [ChenYFan](https://github.com/ChenYFan) 大佬基础上进行修改的 **[TGTalk-worker.js](https://gist.github.com/FloatSheep/55db67d9e8148149ebbcb0f9f6b0d901)**

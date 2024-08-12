@@ -7,7 +7,13 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag === "center",
+        },
+      },
+    }),
     buildPlugin({
       libBuild: {
         buildOptions: {

@@ -26,7 +26,7 @@
               talkConfig.custom.emaction.availableArrayString
             "
             :endpoint="talkConfig.custom.emaction.endpoint"
-            :reactTargetId="channelData.id"
+            :reactTargetId="'tgtalk-evaluate-id-' + channelData.id"
             :theme="talkConfig.custom.emaction.theme"
             :threeDimensional="talkConfig.custom.emaction.threeDimensional"
           />
@@ -43,7 +43,7 @@
     </div>
   </template>
   <template v-else-if="error">
-    <p>发生了一些错误：{{ error }}</p>
+    <p>请求数据时发生了一些错误：{{ error }}</p>
   </template>
   <template v-else><p class="center" v-html="nowChip"></p></template>
 </template>
@@ -161,6 +161,7 @@ onMounted(() => {
   max-height: 92%;
   margin: 5px;
   width: auto;
+  cursor: pointer;
 }
 .talk-package > .talk-img-list {
   margin-left: 1rem;

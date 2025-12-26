@@ -187,6 +187,24 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       }
 
+      /* emaction 按钮暗色模式适配 */
+      html[data-theme="dark"] .emactionExpress {
+        --reaction-got-not-reacted-bg-color-default: #21262d !important;
+        --reaction-got-not-reacted-bg-color-hover-default: #30363d !important;
+        --reaction-got-not-reacted-border-color-default: #424858 !important;
+        --reaction-got-not-reacted-text-color-default: #e6edf3 !important;
+        --reaction-got-reacted-bg-color-default: #1f2428 !important;
+        --reaction-got-reacted-bg-color-hover-default: #30363d !important;
+        --reaction-got-reacted-border-color-default: #58a6ff !important;
+        --reaction-got-reacted-text-color-default: #e6edf3 !important;
+        --reaction-available-popup-bg-color-default: #161b22 !important;
+        --reaction-available-popup-border-color-default: #30363d !important;
+        --reaction-available-popup-box-shadow-default: rgba(0, 0, 0, 0.5) !important;
+        --start-smile-bg-color-default: #21262d !important;
+        --start-smile-border-color-default: #424858 !important;
+        --start-smile-svg-fill-color-default: #e6edf3 !important;
+      }
+
       /* 主题切换按钮 */
       .theme-toggle {
         position: fixed;
@@ -366,14 +384,13 @@
                   proxyUrl: "https://tg-api.mcyzsx.top",
                   image: true,
                 },
-                // 临时禁用 emaction，等待 Worker CORS 修复后启用
                 emaction: {
       enable: true,
       endpoint: "https://api-emaction.mcyzsx.top",
       theme: "system",
       availableArrayString: "",
       threeDimensional: false,
-    },
+                },
                 },
       });
       talker.init(); // 在容器中注入 talker

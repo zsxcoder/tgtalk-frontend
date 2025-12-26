@@ -33,6 +33,11 @@ self.addEventListener('activate', function(event) {
 
 // 拦截请求
 self.addEventListener('fetch', function(event) {
+  // 跳过非 HTTP/HTTPS 请求（如 chrome-extension://、data:// 等）
+  if (!event.request.url.startsWith('http://') && !event.request.url.startsWith('https://')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
@@ -40,7 +45,7 @@ self.addEventListener('fetch', function(event) {
         if (response) {
           return response;
         }
-        
+
         // 否则发起网络请求
         return fetch(event.request).then(
           function(response) {
@@ -48,15 +53,15 @@ self.addEventListener('fetch', function(event) {
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
-            
+
             // 克隆响应
             var responseToCache = response.clone();
-            
+
             caches.open(CACHE_NAME)
               .then(function(cache) {
                 cache.put(event.request, responseToCache);
               });
-            
+
             return response;
           }
         );

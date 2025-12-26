@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>钟神秀的动态</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css" />
     <style>
@@ -300,12 +301,9 @@
                   proxyUrl: "https://tg-api.mcyzsx.top",
                   image: true,
                 },
+                // 临时禁用 emaction，等待 Worker CORS 修复后启用
                 emaction: {
-                  enable: true,
-                  endpoint: "https://api-emaction.mcyzsx.top",
-                  theme: "system",
-                  availableArrayString: "",
-                  threeDimensional: false,
+                  enable: false,
                 },
               },
             });

@@ -1,26 +1,3 @@
-/* global tgTalker */
-// tgTalker 配置
-const TALKER_CONFIG = {
-  serverUrl: "https://tg-api.mcyzsx.top",
-  selector: "#talk-container",
-  zoom: true,
-  defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
-  defaultName: "钟神秀",
-  custom: {
-    proxy: {
-      proxyUrl: "https://tg-api.mcyzsx.top",
-      image: true,
-    },
-    emaction: {
-      enable: true,
-      endpoint: "https://api-emaction.mcyzsx.top",
-      theme: "system",
-      availableArrayString: "",
-      threeDimensional: false,
-    },
-  },
-};
-
 // 更新主题图标
 function updateThemeIcon(theme, iconElement) {
   if (iconElement) {
@@ -74,27 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // 用户手动切换主题后，移除系统主题监听器
       systemThemeQuery.removeEventListener('change', handleSystemThemeChange);
     });
-
-    // 初始化 tgTalker
-    // 等待 tgTalker 加载完成，最多尝试 10 次，每次间隔 100ms
-    const initTalker = (retryCount = 0) => {
-      if (typeof tgTalker !== 'undefined') {
-        try {
-          const talker = new tgTalker(TALKER_CONFIG);
-          talker.init();
-          console.log('tgTalker 初始化成功');
-        } catch (error) {
-          console.error('tgTalker 初始化失败:', error);
-        }
-      } else if (retryCount < 10) {
-        console.log(`等待 tgTalker 加载... (${retryCount + 1}/10)`);
-        setTimeout(() => initTalker(retryCount + 1), 100);
-      } else {
-        console.error('tgTalker 未正确加载，请检查脚本引用顺序');
-      }
-    };
-
-    initTalker();
   } catch (error) {
     console.error('初始化过程中发生错误:', error);
   }

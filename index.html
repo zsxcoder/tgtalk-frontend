@@ -430,21 +430,23 @@
         serverUrl: "https://tg-api.mcyzsx.top", // API
         selector: "#talk-container", // 显示内容的容器
         zoom: true, // 是否启用图片缩放
-                      defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
-              defaultName: "钟神秀",
-              custom: {
-                proxy: {
-                  proxyUrl: "https://tg-api.mcyzsx.top",
-                  image: true,
-                },
-                emaction: {
-      enable: true,
-      endpoint: "https://api-emaction.mcyzsx.top",
-      theme: "system",
-      availableArrayString: "",
-      threeDimensional: false,
-                },
-                },
+        showAvatar: true, // 显示头像
+        showName: true, // 显示名称
+        defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
+        defaultName: "钟神秀",
+        custom: {
+          proxy: {
+            proxyUrl: "https://tg-api.mcyzsx.top",
+            image: true,
+          },
+          emaction: {
+            enable: true,
+            endpoint: "https://api-emaction.mcyzsx.top",
+            theme: "system",
+            availableArrayString: "",
+            threeDimensional: false,
+          },
+        },
       });
       talker.init(); // 在容器中注入 talker
 

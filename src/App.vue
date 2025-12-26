@@ -58,7 +58,7 @@ const props = defineProps({
 });
 
 const talkConfig = {
-  serverUrl: props.config.serverUrl || "",
+  serverUrl: props.config.serverUrl || "https://tg-api.mcyzsx.top",
   selector: props.config.selector,
   zoom: props.config.zoom || false,
   custom: props.config.custom || {

@@ -4,10 +4,37 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue</title>
+    <title>ZSX Moments</title>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- 创建挂载容器 -->
+    <div id="talk-container"></div>
+    
+    <!-- 1. 保留原来的 main.js，它会将 tgTalker 挂载到 window 对象上 -->
     <script type="module" src="/src/main.js"></script>
+    
+    <!-- 2. 在 main.js 加载后，使用 tgTalker -->
+    <script>
+      const talker = new tgTalker({
+        serverUrl: "https://tg-api.mcyzsx.top",
+        selector: "#talk-container",
+        zoom: true,
+        custom: {
+          proxy: {
+            proxyUrl: "https://tg-api.mcyzsx.top",
+            image: true,
+          },
+          emaction: {
+            enable: true,
+            endpoint: "https://api-emaction.mcyzsx.top",
+            theme: "system",
+            availableArrayString: "",
+            threeDimensional: false,
+          },
+        },
+      });
+      
+      talker.init();
+    </script>
   </body>
 </html>

@@ -411,9 +411,11 @@
             }
             
             const gallery = document.createElement('div');
+            gallery.style.display = 'none';
             gallery.innerHTML = imagesArray.map(src => `<img src="${src}" alt="image">`).join('');
             document.body.appendChild(gallery);
             
+            // 使用 hide 回调在初始化时设置，这是 viewer.js 的正确方式
             window.currentViewer = new Viewer(gallery, {
               initialViewIndex: currentIndex,
               toolbar: {
@@ -439,18 +441,16 @@
               transition: true,
               fullscreen: true,
               loop: true,
+              hidden: function() {
+                setTimeout(function() {
+                  if (gallery && gallery.parentNode) {
+                    gallery.parentNode.removeChild(gallery);
+                  }
+                }, 300);
+              }
             });
             
             window.currentViewer.show();
-            
-            // 使用 addEventListener 监听隐藏事件，清理 DOM
-            window.currentViewer.addEventListener('hide', function() {
-              setTimeout(function() {
-                if (gallery && gallery.parentNode) {
-                  gallery.parentNode.removeChild(gallery);
-                }
-              }, 300);
-            });
           });
         });
       }

@@ -155,6 +155,44 @@
         margin-bottom: 8px;
         flex-wrap: wrap;
         gap: 6px;
+        position: relative;
+      }
+
+      /* 标签容器 */
+      #talk-container .talk-package .talk-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+        align-items: flex-start;
+      }
+
+      /* 单个标签样式 */
+      #talk-container .talk-package .talk-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        background-color: var(--hover-bg);
+        border-radius: 16px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+      }
+
+      #talk-container .talk-package .talk-tag:hover {
+        background-color: var(--accent-color);
+        color: #fff;
+        border-color: var(--accent-color);
+        transform: translateY(-1px);
+      }
+
+      /* 暗色模式下的标签 */
+      html[data-theme="dark"] #talk-container .talk-package .talk-tag {
+        background-color: #21262d;
+        border-color: #30363d;
+        color: #8b949e;
       }
 
       #talk-container .talk-package .talk-name {
@@ -548,6 +586,16 @@
           margin-top: 8px;
         }
 
+        /* 移动端标签样式 */
+        #talk-container .talk-tags {
+          margin-top: 8px;
+        }
+
+        #talk-container .talk-tag {
+          padding: 3px 10px;
+          font-size: 11px;
+        }
+
         /* 移动端回到顶部按钮 */
         .back-to-top {
           bottom: 70px;
@@ -764,6 +812,22 @@
           const imgListEl = pkg.querySelector('.talk-img-list');
           const emactionEl = pkg.querySelector('.emactionExpress');
 
+          // 尝试获取标签数据
+          let tags = [];
+          try {
+            // 从数据属性中获取标签
+            if (pkg.dataset.tags) {
+              tags = JSON.parse(pkg.dataset.tags);
+            }
+            // 或者从其他可能的地方获取
+            const tagsEl = pkg.querySelector('.talk-tags');
+            if (tagsEl && !pkg.dataset.tags) {
+              tags = Array.from(tagsEl.querySelectorAll('.tag')).map(t => t.textContent.trim());
+            }
+          } catch (e) {
+            console.log('解析标签失败:', e);
+          }
+
           // 创建内容包装器
           const contentWrapper = document.createElement('div');
           contentWrapper.className = 'talk-content-wrapper';
@@ -800,6 +864,22 @@
           innerContent.appendChild(header);
           if (textEl) innerContent.appendChild(textEl);
           if (imgListEl) innerContent.appendChild(imgListEl);
+          
+          // 如果有标签，创建标签容器
+          if (tags && tags.length > 0) {
+            const tagsContainer = document.createElement('div');
+            tagsContainer.className = 'talk-tags';
+            
+            tags.forEach(function(tag) {
+              const tagEl = document.createElement('span');
+              tagEl.className = 'talk-tag';
+              tagEl.textContent = tag;
+              tagsContainer.appendChild(tagEl);
+            });
+            
+            innerContent.appendChild(tagsContainer);
+          }
+          
           if (emactionEl) innerContent.appendChild(emactionEl);
 
           // 将头像和内部内容添加到包装器

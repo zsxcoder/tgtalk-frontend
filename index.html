@@ -798,11 +798,42 @@
       });
       talker.init(); // 在容器中注入 talker
 
+      // 存储 tags 数据的映射表和数组
+      const tagsMap = new Map();
+      let allTagsData = [];
+
+      // 拦截 fetch 获取 tags 数据
+      (function() {
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+          return originalFetch.apply(this, args).then(response => {
+            // 克隆响应以便读取
+            const clonedResponse = response.clone();
+            clonedResponse.json().then(data => {
+              // 如果返回的数据包含 ChannelMessageData，保存 tags
+              if (data && data.ChannelMessageData) {
+                data.ChannelMessageData.forEach(item => {
+                  if (item.id && item.tags) {
+                    tagsMap.set(item.id, item.tags);
+                  }
+                });
+                // 保存完整数据用于顺序匹配
+                allTagsData = data.ChannelMessageData;
+              }
+            }).catch(() => {});
+            return response;
+          });
+        };
+      })();
+
       // 动态添加头像和名称
       function addAvatarAndName() {
         const packages = document.querySelectorAll('#talk-container .talk-package:not(.has-avatar)');
 
         packages.forEach(function(pkg) {
+          // 获取说说 ID
+          const talkId = pkg.dataset.id;
+
           // 获取时间元素
           const timeEl = pkg.querySelector('.talk-time');
           const timeText = timeEl ? timeEl.textContent : '';
@@ -812,20 +843,26 @@
           const imgListEl = pkg.querySelector('.talk-img-list');
           const emactionEl = pkg.querySelector('.emactionExpress');
 
-          // 尝试获取标签数据
+          // 从映射表获取标签数据
           let tags = [];
-          try {
-            // 从数据属性中获取标签
-            if (pkg.dataset.tags) {
-              tags = JSON.parse(pkg.dataset.tags);
+          if (talkId && tagsMap.has(talkId)) {
+            tags = tagsMap.get(talkId);
+          } else {
+            // 通过索引匹配（备用方案）
+            const allPackages = Array.from(document.querySelectorAll('#talk-container .talk-package'));
+            const index = allPackages.indexOf(pkg);
+            if (allTagsData[index] && allTagsData[index].tags) {
+              tags = allTagsData[index].tags;
             }
-            // 或者从其他可能的地方获取
-            const tagsEl = pkg.querySelector('.talk-tags');
-            if (tagsEl && !pkg.dataset.tags) {
-              tags = Array.from(tagsEl.querySelectorAll('.tag')).map(t => t.textContent.trim());
+          }
+
+          // 如果仍然没有标签，尝试从文本中提取 # 标签
+          if (tags.length === 0 && textEl) {
+            const tagRegex = /#([^\s#]+)/g;
+            const matches = textEl.textContent.match(tagRegex);
+            if (matches) {
+              tags = matches.map(t => t.replace('#', ''));
             }
-          } catch (e) {
-            console.log('解析标签失败:', e);
           }
 
           // 创建内容包装器

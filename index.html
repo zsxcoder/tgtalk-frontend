@@ -382,6 +382,49 @@
         }
       }
 
+      /* 回到顶部按钮 */
+      .back-to-top {
+        position: fixed;
+        bottom: 88px;
+        right: 28px;
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-button);
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+
+      .back-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .back-to-top:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .back-to-top:active {
+        transform: scale(0.95);
+      }
+
+      .back-to-top svg {
+        width: 22px;
+        height: 22px;
+        color: var(--text-primary);
+      }
+
       /* 主题切换按钮 */
       .theme-toggle {
         position: fixed;
@@ -499,6 +542,19 @@
           margin-top: 8px;
         }
 
+        /* 移动端回到顶部按钮 */
+        .back-to-top {
+          bottom: 70px;
+          right: 16px;
+          width: 44px;
+          height: 44px;
+        }
+
+        .back-to-top svg {
+          width: 20px;
+          height: 20px;
+        }
+
         /* 移动端主题按钮 */
         .theme-toggle {
           bottom: 16px;
@@ -549,6 +605,19 @@
           font-size: 13px;
         }
 
+        /* 小屏幕回到顶部按钮 */
+        .back-to-top {
+          bottom: 60px;
+          right: 12px;
+          width: 40px;
+          height: 40px;
+        }
+
+        .back-to-top svg {
+          width: 18px;
+          height: 18px;
+        }
+
         /* 小屏幕主题按钮 */
         .theme-toggle {
           bottom: 12px;
@@ -577,6 +646,13 @@
     <div id="talk-wrapper">
       <div id="talk-container"></div>
     </div>
+
+    <!--回到顶部按钮-->
+    <button class="back-to-top" id="backToTop" title="回到顶部">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </button>
 
     <!--主题切换按钮-->
     <button class="theme-toggle" id="themeToggle" title="切换主题">
@@ -647,6 +723,7 @@
         serverUrl: "https://tg-api.mcyzsx.top", // API
         selector: "#talk-container", // 显示内容的容器
         zoom: true, // 是否启用图片缩放
+        pageSize: 10, // 每页显示10条
         showAvatar: true, // 显示头像
         showName: true, // 显示名称
         defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
@@ -819,6 +896,9 @@
       const imageObserver = new MutationObserver(function(mutations) {
         initViewer();
         addAvatarAndName();
+        setTimeout(function() {
+          implementPagination();
+        }, 500);
       });
 
       imageObserver.observe(document.getElementById('talk-container'), {
@@ -845,6 +925,188 @@
         childList: true,
         subtree: true
       });
+
+      // 回到顶部按钮功能
+      (function() {
+        const backToTopBtn = document.getElementById('backToTop');
+
+        // 滚动监听
+        function handleScroll() {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          if (scrollTop > 300) {
+            backToTopBtn.classList.add('visible');
+          } else {
+            backToTopBtn.classList.remove('visible');
+          }
+        }
+
+        // 点击回到顶部
+        backToTopBtn.addEventListener('click', function() {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+
+        // 监听滚动事件
+        window.addEventListener('scroll', handleScroll);
+
+        // 初始化检查
+        handleScroll();
+      })();
+
+      // 分页功能
+      let currentPage = 1;
+      const itemsPerPage = 10;
+
+      function implementPagination() {
+        const packages = document.querySelectorAll('#talk-container .talk-package');
+        const totalPages = Math.ceil(packages.length / itemsPerPage);
+
+        // 只在第一次或元素数量变化时创建分页
+        let pagination = document.getElementById('pagination');
+        if (!pagination) {
+          pagination = document.createElement('div');
+          pagination.id = 'pagination';
+          document.getElementById('talk-container').appendChild(pagination);
+        }
+
+        // 更新分页按钮
+        updatePagination(totalPages);
+
+        // 初始显示第一页
+        showPage(currentPage);
+      }
+
+      function showPage(page) {
+        const packages = document.querySelectorAll('#talk-container .talk-package');
+        packages.forEach(function(pkg, index) {
+          const pageNumber = Math.floor(index / itemsPerPage) + 1;
+          if (pageNumber === page) {
+            pkg.style.display = 'flex';
+          } else {
+            pkg.style.display = 'none';
+          }
+        });
+      }
+
+      function updatePagination(totalPages) {
+        const pagination = document.getElementById('pagination');
+        if (totalPages <= 1) {
+          pagination.style.display = 'none';
+          return;
+        }
+
+        pagination.style.display = 'flex';
+        pagination.style.justifyContent = 'center';
+        pagination.style.alignItems = 'center';
+        pagination.style.margin = '24px 0';
+        pagination.style.flexWrap = 'wrap';
+        pagination.style.gap = '8px';
+
+        pagination.innerHTML = '';
+
+        // 上一页按钮
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '上一页';
+        prevBtn.className = 'pagination-btn';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener('click', function() {
+          if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+            updatePagination(totalPages);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+        pagination.appendChild(prevBtn);
+
+        // 页码按钮
+        for (let i = 1; i <= totalPages; i++) {
+          const pageBtn = document.createElement('button');
+          pageBtn.textContent = i;
+          pageBtn.className = 'pagination-btn';
+          if (i === currentPage) {
+            pageBtn.classList.add('active');
+          }
+          pageBtn.addEventListener('click', function() {
+            currentPage = i;
+            showPage(currentPage);
+            updatePagination(totalPages);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+          pagination.appendChild(pageBtn);
+        }
+
+        // 下一页按钮
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = '下一页';
+        nextBtn.className = 'pagination-btn';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.addEventListener('click', function() {
+          if (currentPage < totalPages) {
+            currentPage++;
+            showPage(currentPage);
+            updatePagination(totalPages);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+        pagination.appendChild(nextBtn);
+      }
+
+      // 添加分页按钮样式
+      const paginationStyle = document.createElement('style');
+      paginationStyle.textContent = `
+        #pagination .pagination-btn {
+          padding: 8px 16px;
+          background-color: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          color: var(--text-primary);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        #pagination .pagination-btn:hover:not(:disabled) {
+          background-color: var(--accent-color);
+          color: #fff;
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
+        }
+
+        #pagination .pagination-btn:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        #pagination .pagination-btn.active {
+          background-color: var(--accent-color);
+          color: #fff;
+          border-color: var(--accent-color);
+        }
+
+        #pagination .pagination-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        /* 移动端分页样式 */
+        @media (max-width: 768px) {
+          #pagination .pagination-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+          }
+        }
+      `;
+      document.head.appendChild(paginationStyle);
+
+      // 初始化分页
+      setTimeout(function() {
+        implementPagination();
+      }, 2000);
+
+
     </script>
   </body>
 </html>

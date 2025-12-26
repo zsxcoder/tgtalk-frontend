@@ -133,7 +133,6 @@
         display: block;
         object-fit: cover;
         transition: transform 0.3s ease;
-        cursor: zoom-in;
       }
 
       #talk-container .talk-img img:hover {
@@ -146,11 +145,15 @@
       }
 
       .viewer-backdrop {
-        background-color: rgba(0, 0, 0, 0.9) !important;
+        background-color: rgba(0, 0, 0, 0.95) !important;
       }
 
       .viewer-footer {
         display: none !important;
+      }
+
+      .viewer-toolbar {
+        background-color: rgba(0, 0, 0, 0.8) !important;
       }
 
       #talk-container .getMore {
@@ -300,6 +303,11 @@
     <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/viewerjs@1.11.7/dist/viewer.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/viewerjs@1.11.7/dist/viewer.min.css"
+    />
     <script>
       // 主题切换功能
       (function() {
@@ -365,6 +373,88 @@
               },
       });
       talker.init(); // 在容器中注入 talker
+
+      // 手动初始化 viewer.js，用于图片灯箱放大
+      function initViewer() {
+        // 为所有 talk-img 中的图片添加点击事件
+        const talkImages = document.querySelectorAll('#talk-container .talk-img img');
+        
+        talkImages.forEach(function(img) {
+          // 确保图片可点击
+          img.style.cursor = 'zoom-in';
+          
+          // 创建 viewer 实例
+          img.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 获取当前卡片中的所有图片
+            const parentPackage = this.closest('.talk-package');
+            const allImages = parentPackage.querySelectorAll('.talk-img img');
+            const imagesArray = Array.from(allImages).map(img => img.src);
+            const currentIndex = imagesArray.indexOf(this.src);
+            
+            // 创建或更新 viewer
+            if (window.currentViewer) {
+              window.currentViewer.destroy();
+            }
+            
+            const gallery = document.createElement('div');
+            gallery.innerHTML = imagesArray.map(src => `<img src="${src}" alt="image">`).join('');
+            document.body.appendChild(gallery);
+            
+            window.currentViewer = new Viewer(gallery, {
+              initialViewIndex: currentIndex,
+              toolbar: {
+                zoomIn: 1,
+                zoomOut: 1,
+                oneToOne: 1,
+                reset: 1,
+                prev: 1,
+                play: false,
+                next: 1,
+                rotateLeft: 1,
+                rotateRight: 1,
+                flipHorizontal: 1,
+                flipVertical: 1,
+              },
+              navbar: true,
+              title: false,
+              keyboard: true,
+              movable: true,
+              zoomable: true,
+              zoomOnWheel: true,
+              zoomOnTouch: true,
+              transition: true,
+              fullscreen: true,
+              loop: true,
+            });
+            
+            window.currentViewer.show();
+            
+            // 监听隐藏事件，清理 DOM
+            window.currentViewer.on('hide', function() {
+              setTimeout(function() {
+                if (gallery && gallery.parentNode) {
+                  gallery.parentNode.removeChild(gallery);
+                }
+              }, 300);
+            });
+          });
+        });
+      }
+
+      // 初始化时调用
+      setTimeout(initViewer, 1000);
+
+      // 使用 MutationObserver 监听 DOM 变化，动态添加的图片也支持放大
+      const imageObserver = new MutationObserver(function(mutations) {
+        initViewer();
+      });
+
+      imageObserver.observe(document.getElementById('talk-container'), {
+        childList: true,
+        subtree: true
+      });
 
       // 监听 viewer 事件，控制主题切换按钮显示/隐藏
       const observer = new MutationObserver(function(mutations) {

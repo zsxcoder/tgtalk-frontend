@@ -29,29 +29,6 @@
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
-    <script>
-      const talker = new tgTalker({
-        serverUrl: "https://tg-api.mcyzsx.top",
-        selector: "#talk-container",
-        zoom: true,
-        defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
-        defaultName: "钟神秀",
-        custom: {
-          proxy: {
-            proxyUrl: "https://tg-api.mcyzsx.top",
-            image: true,
-          },
-          emaction: {
-            enable: true,
-            endpoint: "https://api-emaction.mcyzsx.top",
-            theme: "system",
-            availableArrayString: "",
-            threeDimensional: false,
-          },
-        },
-      });
-      talker.init();
-    </script>
     <script src="./assets/main.js" defer></script>
   </body>
 </html>

@@ -129,10 +129,24 @@
 
       #talk-container .talk-img img {
         transition: transform 0.3s ease;
+        cursor: zoom-in;
       }
 
       #talk-container .talk-img img:hover {
         transform: scale(1.02);
+      }
+
+      /* Viewer.js 样式覆盖，确保灯箱正常工作 */
+      .viewer-container {
+        z-index: 99999 !important;
+      }
+
+      .viewer-backdrop {
+        background-color: rgba(0, 0, 0, 0.9) !important;
+      }
+
+      .viewer-footer {
+        display: none !important;
       }
 
       #talk-container .getMore {
@@ -182,7 +196,7 @@
         align-items: center;
         justify-content: center;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 9999;
+        z-index: 1000;
         -webkit-backdrop-filter: blur(10px);
         backdrop-filter: blur(10px);
       }
@@ -201,6 +215,12 @@
         height: 24px;
         color: var(--text-primary);
         transition: all 0.3s ease;
+      }
+
+      /* Viewer.js 激活时隐藏主题切换按钮 */
+      body.viewer-open .theme-toggle {
+        opacity: 0;
+        pointer-events: none;
       }
 
       /* 滚动条样式 */
@@ -341,6 +361,26 @@
               },
       });
       talker.init(); // 在容器中注入 talker
+
+      // 监听 viewer 事件，控制主题切换按钮显示/隐藏
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'childList') {
+            const viewerContainer = document.querySelector('.viewer-container');
+            if (viewerContainer) {
+              document.body.classList.add('viewer-open');
+            } else {
+              document.body.classList.remove('viewer-open');
+            }
+          }
+        });
+      });
+
+      // 监听 body 下的子元素变化
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
     </script>
   </body>
 </html>

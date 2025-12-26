@@ -6,32 +6,51 @@
         v-for="channelData in talkData.ChannelMessageData"
         :key="channelData.id"
       >
-        <div class="talk-id">#{{ channelData.id }}</div>
-        <div class="talk-text" v-html="channelData.text"></div>
-        <div class="talk-img-list">
-          <div
-            class="talk-img"
-            v-for="imgUrl in channelData.image"
-            :key="imgUrl"
-          >
-            <template v-if="talkConfig.zoom && imgUrl"
-              ><img v-lazy="imgUrl" :src="imgUrl" v-viewer />
-            </template>
-            <template v-else-if="imgUrl"><img v-lazy="imgUrl" /></template>
+        <!-- 头像 -->
+        <img 
+          :src="channelData.avatar || talkConfig.defaultAvatar" 
+          class="talk-avatar"
+          alt="头像"
+        />
+        
+        <!-- 内容区域 -->
+        <div class="talk-content">
+          <!-- 昵称和发布时间 -->
+          <div class="talk-header">
+            <span class="talk-name">{{ channelData.name || talkConfig.defaultName }}</span>
+            <span class="talk-time">{{ formatTime(channelData.time) }}</span>
           </div>
+          
+          <!-- 文本内容 -->
+          <div class="talk-text" v-html="channelData.text"></div>
+          
+          <!-- 图片列表 -->
+          <div class="talk-img-list" :class="'img-count-' + channelData.image.length">
+            <div
+              class="talk-img"
+              v-for="(imgUrl, index) in channelData.image"
+              :key="index"
+            >
+              <template v-if="talkConfig.zoom && imgUrl"
+                ><img v-lazy="imgUrl" :src="imgUrl" v-viewer />
+              </template>
+              <template v-else-if="imgUrl"><img v-lazy="imgUrl" /></template>
+            </div>
+          </div>
+          
+          <!-- 评价组件 -->
+          <template v-if="talkConfig.custom.emaction.enable">
+            <emactionExpress
+              :availableArrayString="
+                talkConfig.custom.emaction.availableArrayString
+              "
+              :endpoint="talkConfig.custom.emaction.endpoint"
+              :reactTargetId="'tgtalk-evaluate-id-' + channelData.id"
+              :theme="talkConfig.custom.emaction.theme"
+              :threeDimensional="talkConfig.custom.emaction.threeDimensional"
+            />
+          </template>
         </div>
-        <template v-if="talkConfig.custom.emaction.enable">
-          <emactionExpress
-            :availableArrayString="
-              talkConfig.custom.emaction.availableArrayString
-            "
-            :endpoint="talkConfig.custom.emaction.endpoint"
-            :reactTargetId="'tgtalk-evaluate-id-' + channelData.id"
-            :theme="talkConfig.custom.emaction.theme"
-            :threeDimensional="talkConfig.custom.emaction.threeDimensional"
-          />
-        </template>
-        <div class="talk-time">{{ channelData.time }}</div>
       </div>
       <template v-if="nextBefore">
         <center>
@@ -43,7 +62,7 @@
     </div>
   </template>
   <template v-else-if="error">
-    <p>请求数据时发生了一些错误：{{ error }}</p>
+    <p class="error-message">请求数据时发生了一些错误：{{ error }}</p>
   </template>
   <template v-else><p class="center" v-html="nowChip"></p></template>
 </template>
@@ -61,6 +80,8 @@ const talkConfig = {
   serverUrl: props.config.serverUrl || "https://tg-api.mcyzsx.top",
   selector: props.config.selector,
   zoom: props.config.zoom || false,
+  defaultAvatar: props.config.defaultAvatar || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cccccc'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E",
+  defaultName: props.config.defaultName || "Telegram 频道",
   custom: props.config.custom || {
     proxy: {
       proxyUrl: props.config.serverUrl,
@@ -74,6 +95,42 @@ const talkConfig = {
       threeDimensional: false,
     },
   },
+};
+
+// 格式化时间显示
+const formatTime = (time) => {
+  const date = new Date(time);
+  const now = new Date();
+  const diff = now - date;
+  
+  // 小于1分钟
+  if (diff < 60000) {
+    return '刚刚';
+  }
+  // 小于1小时
+  if (diff < 3600000) {
+    return Math.floor(diff / 60000) + '分钟前';
+  }
+  // 小于24小时
+  if (diff < 86400000) {
+    return Math.floor(diff / 3600000) + '小时前';
+  }
+  // 小于7天
+  if (diff < 604800000) {
+    return Math.floor(diff / 86400000) + '天前';
+  }
+  
+  // 超过7天显示具体日期
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  
+  if (year === now.getFullYear()) {
+    return `${month}-${day} ${hour}:${minute}`;
+  }
+  return `${year}-${month}-${day} ${hour}:${minute}`;
 };
 
 const loadLyrics = baseAssets.loadingLyric;
@@ -143,127 +200,286 @@ onMounted(() => {
 </script>
 
 <style>
+/* 朋友圈风格样式 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#talk-wrapper {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 10px;
+}
+
 .talk-package {
   display: flex;
-  margin: 0 0 3rem 0;
-  border: 2px solid #ddd;
-  border-radius: 0.8rem;
-  padding: 1rem;
-  align-items: flex-start;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 头像 */
+.talk-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-right: 12px;
+  background-color: #f0f0f0;
+  object-fit: cover;
+}
+
+/* 内容区域 */
+.talk-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 头部：昵称和时间 */
+.talk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
   flex-wrap: wrap;
+  gap: 4px;
+}
+
+.talk-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #576b95;
+  word-break: break-word;
+}
+
+.talk-time {
+  font-size: 12px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+/* 文本内容 */
+.talk-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333333;
   word-wrap: break-word;
-  word-break: break-all;
-  line-height: unset;
+  word-break: break-word;
+  margin-bottom: 8px;
 }
-.talk-package > .talk-img-list > .talk-img img {
-  object-fit: contain;
-  max-height: 92%;
-  margin: 5px;
-  width: auto;
-  cursor: pointer;
-}
-.talk-package > .talk-img-list {
-  margin-left: 1rem;
-  flex-basis: 100%;
-  align-content: center;
-  text-align: center;
-}
-.talk-package > .talk-time {
-  margin-left: auto;
-  margin-top: auto;
-  margin-top: 0.5rem;
-}
-.talk-package > .talk-id {
-  margin-left: auto;
-  margin-bottom: auto;
-  font-size: 24px;
-}
-.talk-package > .talk-text {
-  width: 100%;
-}
-.talk-package > .talk-text pre {
+
+.talk-text pre {
   white-space: pre-wrap;
   word-wrap: break-word;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 5px 0;
+  font-size: 13px;
 }
-.talk-package > .talk-text i.emoji {
+
+.talk-text i.emoji {
   font-style: normal !important;
   background-image: none !important;
   background: none !important;
 }
+
+/* 图片列表 */
+.talk-img-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* 单张图片 */
+.talk-img-list.img-count-1 {
+  grid-template-columns: 1fr;
+}
+
+.talk-img-list.img-count-1 .talk-img img {
+  max-width: 100%;
+  max-height: 300px;
+}
+
+/* 两张图片 */
+.talk-img-list.img-count-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* 三张及以上图片 */
+.talk-img-list.img-count-3,
+.talk-img-list.img-count-4 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* 五张及以上图片 - 朋友圈九宫格布局 */
+.talk-img-list.img-count-5,
+.talk-img-list.img-count-6,
+.talk-img-list.img-count-7,
+.talk-img-list.img-count-8,
+.talk-img-list.img-count-9 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.talk-img {
+  position: relative;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+}
+
+.talk-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.talk-img img:hover {
+  opacity: 0.9;
+}
+
+/* 评价组件 */
 .talk-package > .emactionExpress {
-  margin-top: 0.5rem;
+  margin-top: 8px;
 }
-.center {
-  display: block;
-  text-align: -webkit-center;
-  unicode-bidi: isolate;
-}
+
+/* 加载更多按钮 */
 .getMore {
-  color: #06c;
+  display: inline-block;
+  color: #576b95;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
   transition: all 0.2s;
-  cursor: default;
-  padding: 0.3rem;
-  border: 1px solid transparent;
-  border-radius: 15px;
+  background-color: #ffffff;
+  margin: 10px 0;
 }
+
 .getMore:hover {
-  background-color: #06c;
-  color: #fff;
-  cursor: default;
-}
-.shady {
-  color: #000;
-  background-color: #000;
-  transition: 0.1s;
-  border-radius: 10.1%;
-  border-radius: 0.3rem !important;
-  padding: 0.2rem;
-  -webkit-transition: 0.1s;
-  -moz-transition: 0.1s;
-  -ms-transition: 0.1s;
-  -o-transition: 0.1s;
-  -webkit-border-radius: 10.1%;
-  -moz-border-radius: 10.1%;
-  -ms-border-radius: 10.1%;
-  -o-border-radius: 10.1%;
+  background-color: #e8e8e8;
 }
 
-.shady s {
-  opacity: 0;
-  transition: 0.1s;
-  -webkit-transition: 0.1s;
-  -moz-transition: 0.1s;
-  -ms-transition: 0.1s;
-  -o-transition: 0.1s;
+/* 错误提示 */
+.error-message {
+  text-align: center;
+  color: #ff4d4f;
+  padding: 20px;
+  font-size: 14px;
 }
 
-.shady:hover {
-  color: #fff;
-  border-radius: 10.1%;
-  text-shadow: 0 0 5px #fff, 0 0 5px #fff;
-  transition: 0.1s;
-  -webkit-transition: 0.1s;
-  -moz-transition: 0.1s;
-  -ms-transition: 0.1s;
-  -o-transition: 0.1s;
-  -webkit-border-radius: 10.1%;
-  -moz-border-radius: 10.1%;
-  -ms-border-radius: 10.1%;
-  -o-border-radius: 10.1%;
+/* 加载动画 */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #999999;
+  font-size: 14px;
+  line-height: 1.8;
+  padding: 20px;
+  text-align: center;
 }
 
-.shady:hover s {
-  opacity: 1;
-  border-radius: 10.1%;
-  text-shadow: 0 0 5px #fff, 0 0 5px #fff;
-  transition: 0.1s;
-  -webkit-transition: 0.1s;
-  -moz-transition: 0.1s;
-  -ms-transition: 0.1s;
-  -o-transition: 0.1s;
-  -webkit-border-radius: 10.1%;
-  -moz-border-radius: 10.1%;
-  -ms-border-radius: 10.1%;
-  -o-border-radius: 10.1%;
+/* 响应式设计 - 手机端 */
+@media (max-width: 768px) {
+  #talk-wrapper {
+    padding: 0;
+  }
+  
+  .talk-package {
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 12px 15px;
+    box-shadow: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .talk-avatar {
+    width: 42px;
+    height: 42px;
+    margin-right: 10px;
+  }
+  
+  .talk-name {
+    font-size: 15px;
+  }
+  
+  .talk-text {
+    font-size: 14px;
+  }
+  
+  .talk-time {
+    font-size: 11px;
+  }
+  
+  .talk-img-list {
+    gap: 4px;
+  }
+  
+  .talk-img-list.img-count-1 .talk-img img {
+    max-height: 200px;
+  }
+}
+
+/* 响应式设计 - 平板 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #talk-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 10px;
+  }
+}
+
+/* 响应式设计 - 电脑端 */
+@media (min-width: 1025px) {
+  #talk-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 10px;
+  }
+  
+  .talk-package {
+    padding: 15px 20px;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  #talk-wrapper {
+    background-color: #1a1a1a;
+  }
+  
+  .talk-package {
+    background-color: #2d2d2d;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid #3d3d3d;
+  }
+  
+  .talk-text {
+    color: #e0e0e0;
+  }
+  
+  .talk-text pre {
+    background-color: #1a1a1a;
+  }
+  
+  .talk-img {
+    background-color: #1a1a1a;
+  }
+  
+  .getMore {
+    background-color: #2d2d2d;
+  }
+  
+  .getMore:hover {
+    background-color: #3d3d3d;
+  }
 }
 </style>

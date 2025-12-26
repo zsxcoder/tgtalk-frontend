@@ -368,9 +368,13 @@
                 },
                 // 临时禁用 emaction，等待 Worker CORS 修复后启用
                 emaction: {
-                  enable: false,
+      enable: true,
+      endpoint: "https://api-emaction.mcyzsx.top",
+      theme: "system",
+      availableArrayString: "",
+      threeDimensional: false,
+    },
                 },
-              },
       });
       talker.init(); // 在容器中注入 talker
 
@@ -380,6 +384,14 @@
         const talkImages = document.querySelectorAll('#talk-container .talk-img img');
         
         talkImages.forEach(function(img) {
+          // 跳过已经绑定过事件的图片
+          if (img.hasAttribute('data-viewer-initialized')) {
+            return;
+          }
+          
+          // 标记为已初始化
+          img.setAttribute('data-viewer-initialized', 'true');
+          
           // 确保图片可点击
           img.style.cursor = 'zoom-in';
           
@@ -431,8 +443,8 @@
             
             window.currentViewer.show();
             
-            // 监听隐藏事件，清理 DOM
-            window.currentViewer.on('hide', function() {
+            // 使用 addEventListener 监听隐藏事件，清理 DOM
+            window.currentViewer.addEventListener('hide', function() {
               setTimeout(function() {
                 if (gallery && gallery.parentNode) {
                   gallery.parentNode.removeChild(gallery);

@@ -1,257 +1,344 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TG Talker with Dark Mode & Jike Style</title>
-    <!-- 样式文件 - 使用特定版本避免缓存问题 -->
+    <!--样式文件 - 使用特定版本避免缓存问题-->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@2.0.0-alpha2.5/dist/style.css"
       id="styleSheet"
     />
     <style>
-      /* --- CSS 变量定义 --- */
-      /* 默认是亮色模式 */
       :root {
-        --bg-color: #f0f2f5; /* 页面背景色 */
-        --text-color: #333; /* 主要文字颜色 */
-        --secondary-text-color: #666; /* 次要文字颜色 */
-        --card-bg-color: #fff; /* 卡片背景色 */
-        --border-color: #e0e0e0; /* 边框颜色 */
-        --shadow-color: rgba(0, 0, 0, 0.08); /* 阴影颜色 */
-        --link-color: #1890ff; /* 链接颜色 */
-        --button-bg-color: #fff; /* 按钮背景色 */
-        --button-text-color: #333; /* 按钮文字颜色 */
-        --icon-color: #666; /* 按钮图标颜色 */
-
-        /* tg-talker 内部元素颜色变量 (尝试覆盖，可能需要 !important) */
-        --tg-bubble-bg-color: #f5f5f5; /* 消息气泡背景色 */
-        --tg-bubble-text-color: #333; /* 消息气泡文字色 */
+        --bg-primary: #f5f6f7;
+        --bg-card: #ffffff;
+        --text-primary: #24292f;
+        --text-secondary: #6e7781;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
+        --hover-bg: #f8f9fa;
+        --accent-color: #0066ff;
+        --link-color: #0066ff;
+        --radius-card: 12px;
+        --radius-button: 50%;
       }
 
-      /* 暗色模式覆盖 */
-      html.dark-mode {
-        --bg-color: #1a1a1a;
-        --text-color: #e0e0e0;
-        --secondary-text-color: #b0b0b0;
-        --card-bg-color: #2b2b2b;
-        --border-color: #3a3a3a;
-        --shadow-color: rgba(255, 255, 255, 0.08);
-        --link-color: #69c0ff;
-        --button-bg-color: #2b2b2b;
-        --button-text-color: #e0e0e0;
-        --icon-color: #b0b0b0;
-
-        --tg-bubble-bg-color: #3a3a3a;
-        --tg-bubble-text-color: #e0e0e0;
+      [data-theme="dark"] {
+        --bg-primary: #0d1117;
+        --bg-card: #161b22;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --border-color: #30363d;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+        --hover-bg: #21262d;
+        --accent-color: #58a6ff;
+        --link-color: #58a6ff;
       }
 
-      /* 优先考虑用户系统偏好设置 */
-      @media (prefers-color-scheme: dark) {
-        :root {
-          /* 如果用户系统偏好暗色，且没有通过JS明确设置，则默认为暗色 */
-          --bg-color: #1a1a1a;
-          --text-color: #e0e0e0;
-          --secondary-text-color: #b0b0b0;
-          --card-bg-color: #2b2b2b;
-          --border-color: #3a3a3a;
-          --shadow-color: rgba(255, 255, 255, 0.08);
-          --link-color: #69c0ff;
-          --button-bg-color: #2b2b2b;
-          --button-text-color: #e0e0e0;
-          --icon-color: #b0b0b0;
-
-          --tg-bubble-bg-color: #3a3a3a;
-          --tg-bubble-text-color: #e0e0e0;
-        }
-      }
-
-      /* --- 全局及布局样式 --- */
-      body {
+      * {
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
-          "Helvetica Neue", sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        line-height: 1.6;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
         transition: background-color 0.3s ease, color 0.3s ease;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
-      /* 即刻布局容器 */
-      .jike-layout {
-        max-width: 700px; /* 即刻短文常见的最大宽度 */
-        margin: 20px auto; /* 居中并上下留白 */
-        padding: 0 15px; /* 左右内边距，防止内容贴边 */
+      #talk-wrapper {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        min-height: 100vh;
+        background-color: var(--bg-primary);
       }
 
-      /* 即刻卡片样式 */
-      .jike-card {
-        background-color: var(--card-bg-color);
-        border-radius: 12px;
-        box-shadow: 0 4px 12px var(--shadow-color);
+      /* 覆盖 tgTalker 默认样式，适配即刻风格 */
+      #talk-container {
+        padding: 0;
+      }
+
+      #talk-container .talk-package {
+        background-color: var(--bg-card);
+        border-radius: var(--radius-card);
         padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-        overflow: hidden; /* 防止内容溢出圆角 */
+        transition: all 0.25s ease;
       }
 
-      /* --- 图片自适应样式 --- */
-      /* 确保所有在 .jike-card 内的图片不会超出容器，但不要阻止 tg-talker 的放大逻辑 */
-      .jike-card img {
-        max-width: 100%;
-        height: auto; /* 保持图片原有宽高比 */
-        display: block; /* 移除图片底部可能存在的额外空白 */
-        border-radius: 8px; /* 给图片也添加一些圆角 */
+      #talk-container .talk-package:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
       }
 
-      /* 针对 tg-talker 内部的图片，不再使用 !important，
-         让 tg-talker 自己的放大逻辑可以覆盖这些样式 */
-      #talk-container img {
-        max-width: 100%;
-        height: auto;
+      #talk-container .talk-avatar {
+        border-radius: 10px;
+        border: 2px solid var(--bg-card);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      #talk-container .talk-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+      }
+
+      #talk-container .talk-time {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      #talk-container .talk-text {
+        font-size: 15px;
+        line-height: 1.75;
+        color: var(--text-primary);
+        word-wrap: break-word;
+        word-break: break-word;
+        margin-top: 8px;
+      }
+
+      #talk-container .talk-text a {
+        color: var(--link-color);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--link-color);
+        transition: all 0.2s;
+      }
+
+      #talk-container .talk-text a:hover {
+        border-bottom-style: solid;
+      }
+
+      #talk-container .talk-img {
+        background-color: var(--hover-bg);
         border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
       }
 
+      #talk-container .talk-img img {
+        transition: transform 0.3s ease;
+      }
 
-      /* --- 明暗模式切换按钮样式 --- */
-      #theme-toggle {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
+      #talk-container .talk-img img:hover {
+        transform: scale(1.02);
+      }
+
+      #talk-container .getMore {
+        display: block;
+        margin: 24px auto;
+        padding: 12px 32px;
+        background-color: var(--bg-card);
+        color: var(--accent-color);
         border: 1px solid var(--border-color);
-        background-color: var(--button-bg-color);
-        color: var(--icon-color); /* 使用图标颜色变量 */
-        font-size: 24px;
+        border-radius: 24px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+      }
+
+      #talk-container .getMore:hover {
+        background-color: var(--accent-color);
+        color: #fff;
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      /* 暗色模式特定样式 */
+      html[data-theme="dark"] #talk-container .talk-package {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+
+      html[data-theme="dark"] #talk-container .talk-avatar {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* 主题切换按钮 */
+      .theme-toggle {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 52px;
+        height: 52px;
+        border-radius: var(--radius-button);
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px var(--shadow-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9999;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .theme-toggle:active {
+        transform: scale(0.95);
+      }
+
+      .theme-toggle svg {
+        width: 24px;
+        height: 24px;
+        color: var(--text-primary);
         transition: all 0.3s ease;
-        z-index: 1000;
-        outline: none; /* 移除点击时的焦点框 */
-        -webkit-appearance: none; /* 移除Safari默认按钮样式 */
-        -moz-appearance: none; /* 移除Firefox默认按钮样式 */
-        appearance: none; /* 移除通用默认按钮样式 */
       }
 
-      #theme-toggle:hover {
-        transform: translateY(-2px); /* 悬停时略微上浮 */
-        box-shadow: 0 6px 16px var(--shadow-color);
+      /* 滚动条样式 */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
       }
 
-      #theme-toggle:active {
-        transform: translateY(0); /* 点击时恢复原位 */
-        box-shadow: 0 2px 8px var(--shadow-color);
+      ::-webkit-scrollbar-track {
+        background: transparent;
       }
 
-      /* --- tg-talker 内部元素明暗模式适配 --- */
-      /* 覆盖 tg-talker 自身的一些强样式 */
-      /* 消息气泡背景和文字颜色 */
-      html.dark-mode #talk-container .message-container .message {
-        background-color: var(--tg-bubble-bg-color) !important;
-        color: var(--tg-bubble-text-color) !important;
+      ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
       }
-      /* 用户名和时间 */
-      html.dark-mode #talk-container .user-name,
-      html.dark-mode #talk-container .talk-time {
-        color: var(--secondary-text-color) !important;
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
       }
-      /* 聊天文字颜色 */
-      html.dark-mode #talk-container .talk-text {
-        color: var(--text-color) !important;
-      }
-      /* 链接颜色 */
-      html.dark-mode #talk-container a {
-        color: var(--link-color) !important;
-      }
-      /* tg-talker 的图片加载占位符 */
-      html.dark-mode #talk-container .image-placeholder {
-        background-color: var(--border-color) !important;
-      }
-      /* tg-talker 可能有的滚动条样式 */
-      html.dark-mode #talk-container ::-webkit-scrollbar-thumb {
-        background: #555 !important;
-      }
-      html.dark-mode #talk-container ::-webkit-scrollbar-track {
-        background: #333 !important;
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        #talk-wrapper {
+          padding: 16px 12px;
+        }
+
+        #talk-container .talk-package {
+          padding: 16px;
+          border-radius: 10px;
+          margin-bottom: 12px;
+        }
+
+        #talk-container .talk-name {
+          font-size: 15px;
+        }
+
+        #talk-container .talk-text {
+          font-size: 14px;
+          line-height: 1.7;
+        }
+
+        .theme-toggle {
+          bottom: 20px;
+          right: 20px;
+          width: 48px;
+          height: 48px;
+        }
+
+        .theme-toggle svg {
+          width: 22px;
+          height: 22px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="jike-layout">
-      <div class="jike-card">
-        <!--显示内容的容器-->
-        <div id="talk-container"></div>
-      </div>
+    <!--显示内容的容器-->
+    <div id="talk-wrapper">
+      <div id="talk-container"></div>
     </div>
 
-    <!-- 明暗模式切换按钮 -->
-    <button id="theme-toggle" aria-label="Toggle dark/light mode">
-      <!-- 初始图标会由JS根据当前主题设置 -->
+    <!--主题切换按钮-->
+    <button class="theme-toggle" id="themeToggle" title="切换主题">
+      <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+      <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display: none;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>
     </button>
 
     <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js"></script>
     <script>
-      const htmlElement = document.documentElement; // 获取 <html> 元素
-      const themeToggle = document.getElementById('theme-toggle');
+      // 主题切换功能
+      (function() {
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIconSun = document.getElementById('themeIconSun');
+        const themeIconMoon = document.getElementById('themeIconMoon');
 
-      // 切换主题的函数
-      function applyTheme(isDarkMode) {
-        if (isDarkMode) {
-          htmlElement.classList.add('dark-mode');
-          themeToggle.innerHTML = '☀️'; // 暗色模式下显示太阳图标 (点击切换到亮色)
-        } else {
-          htmlElement.classList.remove('dark-mode');
-          themeToggle.innerHTML = '🌙'; // 亮色模式下显示月亮图标 (点击切换到暗色)
+        // 从 localStorage 读取主题，默认为亮色
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialTheme = savedTheme === 'dark' || (savedTheme === 'auto' && prefersDark) ? 'dark' : 'light';
+
+        // 应用主题
+        function setTheme(theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
+
+          // 更新图标
+          if (theme === 'dark') {
+            themeIconSun.style.display = 'none';
+            themeIconMoon.style.display = 'block';
+          } else {
+            themeIconSun.style.display = 'block';
+            themeIconMoon.style.display = 'none';
+          }
         }
-      }
 
-      // 初始化主题
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        applyTheme(true);
-      } else if (savedTheme === 'light') {
-        applyTheme(false);
-      } else {
-        // 如果没有保存主题，则根据系统偏好设置
-        const prefersDarkMode =
-          window.matchMedia &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(prefersDarkMode);
-      }
+        // 初始化主题
+        setTheme(initialTheme);
 
-      // 按钮点击事件：切换主题并保存偏好
-      themeToggle.addEventListener('click', () => {
-        const isCurrentlyDarkMode = htmlElement.classList.contains('dark-mode');
-        applyTheme(!isCurrentlyDarkMode); // 切换主题
-        localStorage.setItem('theme', isCurrentlyDarkMode ? 'light' : 'dark'); // 保存用户偏好
-      });
+        // 监听系统主题变化
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (localStorage.getItem('theme') === 'auto' || !localStorage.getItem('theme')) {
+              setTheme(e.matches ? 'dark' : 'light');
+            }
+          });
+        }
 
-      // tgTalker 初始化 (您原有的代码)
+        // 切换主题
+        themeToggle.addEventListener('click', function() {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          setTheme(newTheme);
+        });
+      })();
+
       const talker = new tgTalker({
-        serverUrl: 'https://tg-api.mcyzsx.top', // API
-        selector: '#talk-container', // 显示内容的容器
+        serverUrl: "https://tg-api.mcyzsx.top", // API
+        selector: "#talk-container", // 显示内容的容器
         zoom: true, // 是否启用图片缩放
-        defaultAvatar: 'https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg',
-        defaultName: '钟神秀',
-        custom: {
-          proxy: {
-            proxyUrl: 'https://tg-api.mcyzsx.top',
-            image: true,
-          },
-          // 临时禁用 emaction，等待 Worker CORS 修复后启用
-          emaction: {
-            enable: false,
-          },
-        },
+                      defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
+              defaultName: "钟神秀",
+              custom: {
+                proxy: {
+                  proxyUrl: "https://tg-api.mcyzsx.top",
+                  image: true,
+                },
+                // 临时禁用 emaction，等待 Worker CORS 修复后启用
+                emaction: {
+                  enable: false,
+                },
+              },
       });
       talker.init(); // 在容器中注入 talker
     </script>

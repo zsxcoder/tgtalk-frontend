@@ -28,7 +28,6 @@
     </button>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
     <script>
       // 更新主题图标
       function updateThemeIcon(theme, iconElement) {
@@ -42,9 +41,23 @@
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
 
+      // 动态加载 tgTalker 脚本
+      function loadTgTalkerScript() {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js';
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('tgTalker 脚本加载失败，请检查网络连接'));
+          document.head.appendChild(script);
+        });
+      }
+
       // 等待页面和所有资源加载完成
-      window.onload = function() {
+      window.onload = async function() {
         try {
+          // 动态加载 tgTalker
+          await loadTgTalkerScript();
+
           // 主题切换功能
           const themeToggle = document.getElementById('themeToggle');
           const themeIcon = document.getElementById('themeIcon');
@@ -105,7 +118,7 @@
             talker.init();
             console.log('tgTalker 初始化成功');
           } else {
-            console.error('tgTalker 未正确加载，请检查脚本引用顺序');
+            console.error('tgTalker 未正确加载');
           }
         } catch (error) {
           console.error('初始化过程中发生错误:', error);

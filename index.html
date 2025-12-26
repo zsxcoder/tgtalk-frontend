@@ -1,9 +1,10 @@
 <html>
   <head>
-    <!--样式文件-->
+    <!--样式文件 - 使用特定版本避免缓存问题-->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/style.css"
+      href="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@2.0.0-alpha2.5/dist/style.css"
+      id="styleSheet"
     />
     <style>
       /* 主题切换按钮样式 */
@@ -38,7 +39,7 @@
         transition: color 0.3s;
       }
 
-      /* 暗色模式 */
+      /* 暗色模式 - 主题按钮 */
       html.dark-mode .theme-toggle {
         background-color: rgba(22, 27, 34, 0.95);
         border-color: #30363d;
@@ -60,6 +61,100 @@
         .theme-toggle svg {
           width: 20px;
           height: 20px;
+        }
+      }
+
+      /* 内联暗色模式样式 - 确保即使 CDN 未更新也能工作 */
+      html.dark-mode #talk-wrapper,
+      .dark-mode #talk-wrapper {
+        background-color: #0d1117 !important;
+        transition: background-color 0.3s;
+      }
+
+      html.dark-mode .talk-package,
+      .dark-mode .talk-package {
+        background-color: #161b22 !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      html.dark-mode .talk-avatar,
+      .dark-mode .talk-avatar {
+        background-color: #21262d !important;
+        border-color: #30363d !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      html.dark-mode .talk-name,
+      .dark-mode .talk-name {
+        color: #e6edf3 !important;
+      }
+
+      html.dark-mode .talk-time,
+      .dark-mode .talk-time {
+        color: #8b949e !important;
+        background-color: #21262d !important;
+      }
+
+      html.dark-mode .talk-text,
+      .dark-mode .talk-text {
+        color: #c9d1d9 !important;
+      }
+
+      html.dark-mode .talk-text pre,
+      .dark-mode .talk-text pre {
+        background-color: #0d1117 !important;
+        border-left-color: #2f81f7 !important;
+        color: #e6edf3 !important;
+      }
+
+      html.dark-mode .talk-text code,
+      .dark-mode .talk-text code {
+        background-color: #161b22 !important;
+        color: #ff7b72 !important;
+      }
+
+      html.dark-mode .talk-text a,
+      .dark-mode .talk-text a {
+        color: #58a6ff !important;
+        border-bottom-color: #58a6ff !important;
+      }
+
+      html.dark-mode .talk-img,
+      .dark-mode .talk-img {
+        background-color: #0d1117 !important;
+        border-color: #30363d !important;
+      }
+
+      html.dark-mode .getMore,
+      .dark-mode .getMore {
+        background-color: #161b22 !important;
+        color: #58a6ff !important;
+        border-color: #30363d !important;
+      }
+
+      html.dark-mode .getMore:hover,
+      .dark-mode .getMore:hover {
+        background-color: #1f6feb !important;
+        color: #ffffff !important;
+      }
+
+      html.dark-mode .error-message,
+      .dark-mode .error-message {
+        background-color: #1c1212 !important;
+        color: #ff7b72 !important;
+        border-left-color: #ff7b72 !important;
+      }
+
+      html.dark-mode .center,
+      .dark-mode .center {
+        color: #8b949e !important;
+      }
+
+      /* 手机端暗色模式适配 */
+      @media (max-width: 768px) {
+        html.dark-mode .talk-package,
+        .dark-mode .talk-package {
+          border-bottom-color: #30363d !important;
         }
       }
     </style>
@@ -127,9 +222,22 @@
       function toggleTheme() {
         const isDarkMode = document.documentElement.classList.contains('dark-mode');
         const newTheme = !isDarkMode;
-        
+
+        console.log('切换主题:', newTheme ? '深色' : '浅色');
+
         localStorage.setItem('tgtalk-theme', newTheme ? 'dark' : 'light');
         applyTheme(newTheme);
+
+        // 强制更新 talk-wrapper 元素的主题
+        const talkWrapper = document.getElementById('talk-wrapper');
+        if (talkWrapper) {
+          if (newTheme) {
+            talkWrapper.classList.add('dark-mode');
+          } else {
+            talkWrapper.classList.remove('dark-mode');
+          }
+          console.log('talk-wrapper 主题已更新');
+        }
       }
 
       // 监听系统主题变化
@@ -165,6 +273,19 @@
       });
       talker.init(); // 在容器中注入 talker
 
+      // 初始化后立即应用主题到 talk-wrapper
+      setTimeout(() => {
+        const talkWrapper = document.getElementById('talk-wrapper');
+        const isDarkMode = document.documentElement.classList.contains('dark-mode');
+
+        console.log('初始化检查 - talk-wrapper 存在:', !!talkWrapper, '当前主题:', isDarkMode ? '深色' : '浅色');
+
+        if (talkWrapper && isDarkMode) {
+          talkWrapper.classList.add('dark-mode');
+          console.log('已应用深色主题到 talk-wrapper');
+        }
+      }, 500);
+
       // 监听 talk-wrapper 元素的创建，确保主题样式应用
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -174,6 +295,8 @@
               const talkWrapper = node.id === 'talk-wrapper' ? node : node.querySelector?.('#talk-wrapper');
               if (talkWrapper) {
                 const isDarkMode = document.documentElement.classList.contains('dark-mode');
+                console.log('检测到 talk-wrapper 元素，当前主题:', isDarkMode ? '深色' : '浅色');
+
                 if (isDarkMode) {
                   talkWrapper.classList.add('dark-mode');
                 }
@@ -184,10 +307,16 @@
       });
 
       // 开始监听容器变化
-      observer.observe(document.getElementById('talk-container'), {
-        childList: true,
-        subtree: true
-      });
+      const container = document.getElementById('talk-container');
+      if (container) {
+        observer.observe(container, {
+          childList: true,
+          subtree: true
+        });
+        console.log('MutationObserver 已启动');
+      } else {
+        console.error('未找到 talk-container 元素');
+      }
     </script>
   </body>
 </html>

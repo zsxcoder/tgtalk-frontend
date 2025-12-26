@@ -81,6 +81,59 @@
         box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color);
         transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #talk-container .talk-package .talk-content-wrapper {
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+      }
+
+      /* 隐藏原来的时间，因为我们重新组织了布局 */
+      #talk-container .talk-package > .talk-time {
+        display: none;
+      }
+
+      /* 动态添加的头像样式 */
+      #talk-container .talk-package .talk-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        border: 2px solid var(--bg-card);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-right: 12px;
+        flex-shrink: 0;
+        object-fit: cover;
+        background-color: var(--hover-bg);
+      }
+
+      /* 动态添加的名称和时间容器 */
+      #talk-container .talk-package .talk-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      #talk-container .talk-package .talk-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      /* 重新组织的内容区域 */
+      #talk-container .talk-package .talk-text {
+        width: 100%;
+      }
+
+      #talk-container .talk-package .talk-img-list {
+        width: 100%;
+        margin-left: 0;
       }
 
       #talk-container .talk-package:hover {
@@ -190,6 +243,8 @@
       }
 
       html[data-theme="dark"] #talk-container .talk-avatar {
+        background-color: #21262d;
+        border-color: #30363d;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       }
 
@@ -450,6 +505,74 @@
       });
       talker.init(); // 在容器中注入 talker
 
+      // 动态添加头像和名称
+      function addAvatarAndName() {
+        const packages = document.querySelectorAll('#talk-container .talk-package:not(.has-avatar)');
+
+        packages.forEach(function(pkg) {
+          // 获取时间元素
+          const timeEl = pkg.querySelector('.talk-time');
+          const timeText = timeEl ? timeEl.textContent : '';
+
+          // 获取文本和图片元素
+          const textEl = pkg.querySelector('.talk-text');
+          const imgListEl = pkg.querySelector('.talk-img-list');
+          const emactionEl = pkg.querySelector('.emactionExpress');
+
+          // 创建内容包装器
+          const contentWrapper = document.createElement('div');
+          contentWrapper.className = 'talk-content-wrapper';
+
+          // 创建头像元素
+          const avatar = document.createElement('img');
+          avatar.className = 'talk-avatar';
+          avatar.src = "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg";
+          avatar.alt = '头像';
+
+          // 创建内部内容容器
+          const innerContent = document.createElement('div');
+          innerContent.style.flex = '1';
+          innerContent.style.minWidth = '0';
+
+          // 创建头部容器（名称和时间）
+          const header = document.createElement('div');
+          header.className = 'talk-header';
+
+          // 创建名称元素
+          const name = document.createElement('div');
+          name.className = 'talk-name';
+          name.textContent = '钟神秀';
+
+          // 创建时间元素
+          const newTime = document.createElement('div');
+          newTime.className = 'talk-time';
+          newTime.textContent = timeText;
+
+          header.appendChild(name);
+          header.appendChild(newTime);
+
+          // 将元素添加到内部内容容器
+          innerContent.appendChild(header);
+          if (textEl) innerContent.appendChild(textEl);
+          if (imgListEl) innerContent.appendChild(imgListEl);
+          if (emactionEl) innerContent.appendChild(emactionEl);
+
+          // 将头像和内部内容添加到包装器
+          contentWrapper.appendChild(avatar);
+          contentWrapper.appendChild(innerContent);
+
+          // 清空包并添加包装器
+          pkg.innerHTML = '';
+          pkg.appendChild(contentWrapper);
+
+          // 标记为已处理
+          pkg.classList.add('has-avatar');
+        });
+      }
+
+      // 初始化时调用
+      setTimeout(addAvatarAndName, 1500);
+
       // 手动初始化 viewer.js，用于图片灯箱放大
       function initViewer() {
         // 为所有 talk-img 中的图片添加点击事件
@@ -533,6 +656,7 @@
       // 使用 MutationObserver 监听 DOM 变化，动态添加的图片也支持放大
       const imageObserver = new MutationObserver(function(mutations) {
         initViewer();
+        addAvatarAndName();
       });
 
       imageObserver.observe(document.getElementById('talk-container'), {

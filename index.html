@@ -21,6 +21,12 @@
         --link-color: #0066ff;
         --radius-card: 12px;
         --radius-button: 50%;
+        /* emaction 亮色模式变量 */
+        --start-smile-bg-color: #f6f8fa;
+        --start-smile-border-color: #d0d7de;
+        --start-smile-svg-fill-color: #24292f;
+        --reaction-got-not-reacted-bg-color: #f6f8fa;
+        --reaction-got-not-reacted-text-color: #24292f;
       }
 
       [data-theme="dark"] {
@@ -204,6 +210,29 @@
         --start-smile-bg-color-default: #21262d !important;
         --start-smile-border-color-default: #424858 !important;
         --start-smile-svg-fill-color-default: #e6edf3 !important;
+        --start-smile-bg-color: #21262d !important;
+        --start-smile-border-color: #424858 !important;
+        --start-smile-svg-fill-color: #e6edf3 !important;
+      }
+
+      /* 直接用 ID 覆盖开始反应按钮样式 */
+      html[data-theme="dark"] #start-smile {
+        background-color: #21262d !important;
+        border-color: #424858 !important;
+      }
+
+      html[data-theme="dark"] #start-smile-svg {
+        fill: #e6edf3 !important;
+      }
+
+      /* 亮色模式下的开始反应按钮 */
+      #start-smile {
+        background-color: var(--start-smile-bg-color, #f6f8fa) !important;
+        border-color: var(--start-smile-border-color, #d0d7de) !important;
+      }
+
+      #start-smile-svg {
+        fill: var(--start-smile-svg-fill-color, #24292f) !important;
       }
 
       /* emaction 开始反应按钮暗色模式 - 更广泛的选择器 */

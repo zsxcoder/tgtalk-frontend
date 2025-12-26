@@ -13,8 +13,8 @@
     <!-- 1. 保留原来的 main.js，它会将 tgTalker 挂载到 window 对象上 -->
     <script type="module" src="/src/main.js"></script>
     
-    <!-- 2. 在 main.js 加载后，使用 tgTalker -->
-    <script>
+    <!-- 2. 在 main.js 加载后，使用 tgTalker（必须使用 type="module"） -->
+    <script type="module">
       const talker = new tgTalker({
         serverUrl: "https://tg-api.mcyzsx.top",
         selector: "#talk-container",

@@ -5,14 +5,147 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/style.css"
     />
+    <style>
+      /* 主题切换按钮样式 */
+      .theme-toggle {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10000;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .theme-toggle svg {
+        width: 22px;
+        height: 22px;
+        color: #333;
+        transition: color 0.3s;
+      }
+
+      /* 暗色模式 */
+      html.dark-mode .theme-toggle {
+        background-color: rgba(22, 27, 34, 0.95);
+        border-color: #30363d;
+      }
+
+      html.dark-mode .theme-toggle svg {
+        color: #e6edf3;
+      }
+
+      /* 手机端适配 */
+      @media (max-width: 768px) {
+        .theme-toggle {
+          right: 20px;
+          bottom: 20px;
+          width: 44px;
+          height: 44px;
+        }
+
+        .theme-toggle svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle" id="themeToggle" title="切换主题">
+      <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </div>
     <!--显示内容的容器-->
     <div id="talk-container"></div>
     <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js"></script>
     <script>
+      // 主题切换逻辑
+      const themeToggle = document.getElementById('themeToggle');
+      const moonIcon = document.getElementById('moonIcon');
+      const sunIcon = document.getElementById('sunIcon');
+
+      function checkSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      function applyTheme(isDark) {
+        if (isDark) {
+          document.documentElement.classList.add('dark-mode');
+          document.getElementById('talk-wrapper')?.classList.add('dark-mode');
+          moonIcon.style.display = 'block';
+          sunIcon.style.display = 'none';
+        } else {
+          document.documentElement.classList.remove('dark-mode');
+          document.getElementById('talk-wrapper')?.classList.remove('dark-mode');
+          moonIcon.style.display = 'none';
+          sunIcon.style.display = 'block';
+        }
+      }
+
+      function initTheme() {
+        const savedTheme = localStorage.getItem('tgtalk-theme');
+        let isDarkMode;
+
+        if (savedTheme) {
+          isDarkMode = savedTheme === 'dark';
+        } else {
+          isDarkMode = checkSystemTheme();
+        }
+
+        applyTheme(isDarkMode);
+      }
+
+      function toggleTheme() {
+        const isDarkMode = document.documentElement.classList.contains('dark-mode');
+        const newTheme = !isDarkMode;
+        
+        localStorage.setItem('tgtalk-theme', newTheme ? 'dark' : 'light');
+        applyTheme(newTheme);
+      }
+
+      // 监听系统主题变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        // 只有在用户没有手动设置过主题时才跟随系统
+        if (!localStorage.getItem('tgtalk-theme')) {
+          applyTheme(e.matches);
+        }
+      });
+
+      // 绑定点击事件
+      themeToggle.addEventListener('click', toggleTheme);
+
+      // 初始化主题
+      initTheme();
+
       const talker = new tgTalker({
         serverUrl: "https://tg-api.mcyzsx.top", // API
         selector: "#talk-container", // 显示内容的容器
@@ -31,6 +164,30 @@
               },
       });
       talker.init(); // 在容器中注入 talker
+
+      // 监听 talk-wrapper 元素的创建，确保主题样式应用
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+              // 检查是否是 talk-wrapper 或其子元素
+              const talkWrapper = node.id === 'talk-wrapper' ? node : node.querySelector?.('#talk-wrapper');
+              if (talkWrapper) {
+                const isDarkMode = document.documentElement.classList.contains('dark-mode');
+                if (isDarkMode) {
+                  talkWrapper.classList.add('dark-mode');
+                }
+              }
+            }
+          });
+        });
+      });
+
+      // 开始监听容器变化
+      observer.observe(document.getElementById('talk-container'), {
+        childList: true,
+        subtree: true
+      });
     </script>
   </body>
 </html>

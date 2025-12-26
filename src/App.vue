@@ -1,6 +1,23 @@
 <template>
   <template v-if="talkData">
-    <div id="talk-wrapper">
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle" @click="toggleTheme" :title="isDarkMode ? '切换到亮色模式' : '切换到深色模式'">
+      <svg v-if="isDarkMode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </div>
+    <div id="talk-wrapper" :class="{ 'dark-mode': isDarkMode }">
       <div
         class="talk-package"
         v-for="channelData in talkData.ChannelMessageData"
@@ -75,6 +92,38 @@ import { baseAssets } from "./shared/baseAssets";
 const props = defineProps({
   config: Object,
 });
+
+// 主题切换逻辑
+const isDarkMode = ref(false);
+
+const checkSystemTheme = () => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
+const initTheme = () => {
+  // 从 localStorage 读取保存的主题
+  const savedTheme = localStorage.getItem('tgtalk-theme');
+  if (savedTheme) {
+    isDarkMode.value = savedTheme === 'dark';
+  } else {
+    isDarkMode.value = checkSystemTheme();
+  }
+  applyTheme();
+};
+
+const applyTheme = () => {
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark-mode');
+  } else {
+    document.documentElement.classList.remove('dark-mode');
+  }
+};
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value;
+  localStorage.setItem('tgtalk-theme', isDarkMode.value ? 'dark' : 'light');
+  applyTheme();
+};
 
 const talkConfig = {
   serverUrl: props.config.serverUrl || "https://tg-api.mcyzsx.top",
@@ -195,12 +244,13 @@ const moreClick = () => {
 };
 
 onMounted(() => {
+  initTheme();
   fetchData(false);
 });
 </script>
 
 <style>
-/* 朋友圈风格样式 */
+/* 即刻风格样式 - 优化版 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -208,29 +258,77 @@ onMounted(() => {
 }
 
 #talk-wrapper {
-  background-color: #f5f5f5;
+  background-color: #f7f8fa;
   min-height: 100vh;
   padding: 10px;
+  position: relative;
+  transition: background-color 0.3s;
 }
 
+/* 主题切换按钮 */
+.theme-toggle {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle svg {
+  width: 22px;
+  height: 22px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+/* 卡片样式 */
 .talk-package {
   display: flex;
   background-color: #ffffff;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.talk-package:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 /* 头像 */
 .talk-avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 6px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   flex-shrink: 0;
   margin-right: 12px;
-  background-color: #f0f0f0;
+  background-color: #f0f2f5;
   object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.talk-avatar:hover {
+  transform: scale(1.05);
 }
 
 /* 内容区域 */
@@ -244,42 +342,58 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
 }
 
 .talk-name {
   font-size: 16px;
-  font-weight: 500;
-  color: #576b95;
+  font-weight: 600;
+  color: #1a1a1a;
   word-break: break-word;
+  letter-spacing: 0.3px;
 }
 
 .talk-time {
   font-size: 12px;
-  color: #999999;
+  color: #8b949e;
   white-space: nowrap;
+  background-color: #f0f2f5;
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 
 /* 文本内容 */
 .talk-text {
   font-size: 15px;
-  line-height: 1.6;
-  color: #333333;
+  line-height: 1.8;
+  color: #24292f;
   word-wrap: break-word;
   word-break: break-word;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  letter-spacing: 0.2px;
 }
 
 .talk-text pre {
   white-space: pre-wrap;
   word-wrap: break-word;
-  background-color: #f5f5f5;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 5px 0;
+  background-color: #f7f8fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
   font-size: 13px;
+  border-left: 3px solid #0969da;
+  overflow-x: auto;
+}
+
+.talk-text code {
+  background-color: #f6f8fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  color: #d73a49;
 }
 
 .talk-text i.emoji {
@@ -288,21 +402,43 @@ onMounted(() => {
   background: none !important;
 }
 
+.talk-text a {
+  color: #0969da;
+  text-decoration: none;
+  border-bottom: 1px dashed #0969da;
+  transition: all 0.2s;
+}
+
+.talk-text a:hover {
+  color: #0d47a1;
+  border-bottom-style: solid;
+}
+
 /* 图片列表 */
 .talk-img-list {
   display: grid;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-/* 单张图片 */
+/* 单张图片 - 限制最大高度防止破坏布局 */
 .talk-img-list.img-count-1 {
   grid-template-columns: 1fr;
 }
 
-.talk-img-list.img-count-1 .talk-img img {
+.talk-img-list.img-count-1 .talk-img {
   max-width: 100%;
-  max-height: 300px;
+  aspect-ratio: auto;
+  max-height: 500px;
+  border-radius: 8px;
+  background-color: #f7f8fa;
+}
+
+.talk-img-list.img-count-1 .talk-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 500px;
 }
 
 /* 两张图片 */
@@ -310,13 +446,29 @@ onMounted(() => {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* 三张及以上图片 */
-.talk-img-list.img-count-3,
-.talk-img-list.img-count-4 {
+.talk-img-list.img-count-2 .talk-img {
+  aspect-ratio: 4 / 3;
+}
+
+/* 三张图片 */
+.talk-img-list.img-count-3 {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* 五张及以上图片 - 朋友圈九宫格布局 */
+.talk-img-list.img-count-3 .talk-img {
+  aspect-ratio: 1 / 1;
+}
+
+/* 四张图片 - 2x2 布局 */
+.talk-img-list.img-count-4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.talk-img-list.img-count-4 .talk-img {
+  aspect-ratio: 1 / 1;
+}
+
+/* 五张及以上图片 - 九宫格布局 */
 .talk-img-list.img-count-5,
 .talk-img-list.img-count-6,
 .talk-img-list.img-count-7,
@@ -328,9 +480,15 @@ onMounted(() => {
 .talk-img {
   position: relative;
   overflow: hidden;
-  background-color: #f0f0f0;
-  aspect-ratio: 1 / 1;
-  border-radius: 4px;
+  background-color: #f7f8fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid #e1e4e8;
+}
+
+.talk-img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .talk-img img {
@@ -339,6 +497,7 @@ onMounted(() => {
   object-fit: cover;
   cursor: pointer;
   transition: opacity 0.3s;
+  display: block;
 }
 
 .talk-img img:hover {
@@ -347,31 +506,41 @@ onMounted(() => {
 
 /* 评价组件 */
 .talk-package > .emactionExpress {
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 /* 加载更多按钮 */
 .getMore {
   display: inline-block;
-  color: #576b95;
-  padding: 8px 16px;
-  border-radius: 4px;
+  color: #0969da;
+  padding: 12px 24px;
+  border-radius: 24px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   background-color: #ffffff;
-  margin: 10px 0;
+  margin: 20px 0;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e4e8;
 }
 
 .getMore:hover {
-  background-color: #e8e8e8;
+  background-color: #0969da;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
+  transform: translateY(-2px);
 }
 
 /* 错误提示 */
 .error-message {
   text-align: center;
-  color: #ff4d4f;
-  padding: 20px;
-  font-size: 14px;
+  color: #d73a49;
+  padding: 40px 20px;
+  font-size: 15px;
+  background-color: #fff8f8;
+  border-radius: 12px;
+  margin: 20px;
+  border-left: 4px solid #d73a49;
 }
 
 /* 加载动画 */
@@ -380,11 +549,113 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  color: #999999;
-  font-size: 14px;
-  line-height: 1.8;
-  padding: 20px;
+  color: #8b949e;
+  font-size: 15px;
+  line-height: 2;
+  padding: 40px 20px;
   text-align: center;
+}
+
+/* 暗色模式 */
+.dark-mode #talk-wrapper,
+html.dark-mode #talk-wrapper {
+  background-color: #0d1117;
+}
+
+.dark-mode .talk-package,
+html.dark-mode .talk-package {
+  background-color: #161b22;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .talk-avatar,
+html.dark-mode .talk-avatar {
+  background-color: #21262d;
+  border-color: #30363d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .talk-name,
+html.dark-mode .talk-name {
+  color: #e6edf3;
+}
+
+.dark-mode .talk-time,
+html.dark-mode .talk-time {
+  color: #8b949e;
+  background-color: #21262d;
+}
+
+.dark-mode .talk-text,
+html.dark-mode .talk-text {
+  color: #c9d1d9;
+}
+
+.dark-mode .talk-text pre,
+html.dark-mode .talk-text pre {
+  background-color: #0d1117;
+  border-left-color: #2f81f7;
+  color: #e6edf3;
+}
+
+.dark-mode .talk-text code,
+html.dark-mode .talk-text code {
+  background-color: #161b22;
+  color: #ff7b72;
+}
+
+.dark-mode .talk-text a,
+html.dark-mode .talk-text a {
+  color: #58a6ff;
+  border-bottom-color: #58a6ff;
+}
+
+.dark-mode .talk-text a:hover,
+html.dark-mode .talk-text a:hover {
+  color: #79c0ff;
+}
+
+.dark-mode .talk-img,
+html.dark-mode .talk-img {
+  background-color: #0d1117;
+  border-color: #30363d;
+}
+
+.dark-mode .getMore,
+html.dark-mode .getMore {
+  background-color: #161b22;
+  color: #58a6ff;
+  border-color: #30363d;
+}
+
+.dark-mode .getMore:hover,
+html.dark-mode .getMore:hover {
+  background-color: #1f6feb;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+}
+
+.dark-mode .error-message,
+html.dark-mode .error-message {
+  background-color: #1c1212;
+  color: #ff7b72;
+  border-left-color: #ff7b72;
+}
+
+.dark-mode .center,
+html.dark-mode .center {
+  color: #8b949e;
+}
+
+.dark-mode .theme-toggle,
+html.dark-mode .theme-toggle {
+  background-color: rgba(22, 27, 34, 0.95);
+  border-color: #30363d;
+}
+
+.dark-mode .theme-toggle svg,
+html.dark-mode .theme-toggle svg {
+  color: #e6edf3;
 }
 
 /* 响应式设计 - 手机端 */
@@ -396,15 +667,20 @@ onMounted(() => {
   .talk-package {
     border-radius: 0;
     margin-bottom: 0;
-    padding: 12px 15px;
+    padding: 16px;
     box-shadow: none;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e1e4e8;
+  }
+  
+  .dark-mode .talk-package,
+  html.dark-mode .talk-package {
+    border-bottom-color: #30363d;
   }
   
   .talk-avatar {
-    width: 42px;
-    height: 42px;
-    margin-right: 10px;
+    width: 44px;
+    height: 44px;
+    margin-right: 12px;
   }
   
   .talk-name {
@@ -420,66 +696,45 @@ onMounted(() => {
   }
   
   .talk-img-list {
-    gap: 4px;
+    gap: 6px;
   }
   
-  .talk-img-list.img-count-1 .talk-img img {
-    max-height: 200px;
+  .talk-img-list.img-count-1 .talk-img {
+    max-height: 400px;
+  }
+  
+  .theme-toggle {
+    right: 20px;
+    bottom: 20px;
+    width: 44px;
+    height: 44px;
+  }
+  
+  .theme-toggle svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
 /* 响应式设计 - 平板 */
 @media (min-width: 769px) and (max-width: 1024px) {
   #talk-wrapper {
-    max-width: 600px;
+    max-width: 680px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 16px;
   }
 }
 
 /* 响应式设计 - 电脑端 */
 @media (min-width: 1025px) {
   #talk-wrapper {
-    max-width: 600px;
+    max-width: 680px;
     margin: 0 auto;
-    padding: 20px 10px;
+    padding: 24px 16px;
   }
   
   .talk-package {
-    padding: 15px 20px;
-  }
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-  #talk-wrapper {
-    background-color: #1a1a1a;
-  }
-  
-  .talk-package {
-    background-color: #2d2d2d;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid #3d3d3d;
-  }
-  
-  .talk-text {
-    color: #e0e0e0;
-  }
-  
-  .talk-text pre {
-    background-color: #1a1a1a;
-  }
-  
-  .talk-img {
-    background-color: #1a1a1a;
-  }
-  
-  .getMore {
-    background-color: #2d2d2d;
-  }
-  
-  .getMore:hover {
-    background-color: #3d3d3d;
+    padding: 20px;
   }
 }
 </style>

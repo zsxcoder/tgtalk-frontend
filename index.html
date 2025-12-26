@@ -1,300 +1,24 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>钟神秀的动态</title>
-    <link rel="stylesheet" href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css" />
-    <style>
-      :root {
-        --bg-primary: #f8f9fa;
-        --bg-card: #ffffff;
-        --text-primary: #1a1a1a;
-        --text-secondary: #86868b;
-        --border-color: #e5e5e5;
-        --shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-        --hover-bg: #f5f5f7;
-        --accent-color: #007aff;
-        --link-color: #007aff;
-      }
-
-      [data-theme="dark"] {
-        --bg-primary: #1c1c1e;
-        --bg-card: #2c2c2e;
-        --text-primary: #f5f5f7;
-        --text-secondary: #86868b;
-        --border-color: #3a3a3c;
-        --shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-        --hover-bg: #3a3a3c;
-        --accent-color: #0a84ff;
-        --link-color: #ffffff;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-        min-height: 100vh;
-        transition: background-color 0.3s ease, color 0.3s ease;
-        line-height: 1.6;
-      }
-
-      .container {
-        max-width: 680px;
-        margin: 0 auto;
-        padding: 24px 20px;
-      }
-
-      .user-card {
-        background: var(--bg-card);
-        border-radius: 16px;
-        padding: 32px;
-        margin-bottom: 20px;
-        box-shadow: var(--shadow);
-        transition: all 0.3s ease;
-      }
-
-      .user-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .avatar {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid var(--accent-color);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .user-details {
-        flex: 1;
-      }
-
-      .user-name {
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 4px;
-      }
-
-      .user-bio {
-        font-size: 14px;
-        color: var(--text-secondary);
-      }
-
-      .talk-container-wrapper {
-        background: var(--bg-card);
-        border-radius: 16px;
-        box-shadow: var(--shadow);
-        overflow: hidden;
-        transition: all 0.3s ease;
-      }
-
-      #talk-container {
-        padding: 20px;
-      }
-
-      /* tgTalker 内容样式优化 */
-      #talk-container img {
-        max-width: 100%;
-        height: auto;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-      }
-
-      #talk-container a {
-        color: var(--link-color);
-        text-decoration: none;
-        transition: color 0.3s ease;
-      }
-
-      #talk-container a:hover {
-        text-decoration: underline;
-      }
-
-      /* 主题切换按钮 */
-      .theme-toggle {
-        position: fixed;
-        bottom: 32px;
-        right: 32px;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: var(--bg-card);
-        border: 2px solid var(--border-color);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        transition: all 0.3s ease;
-        z-index: 1000;
-      }
-
-      .theme-toggle:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-      }
-
-      .theme-toggle:active {
-        transform: scale(0.95);
-      }
-
-      /* 响应式设计 */
-      @media (max-width: 768px) {
-        .container {
-          padding: 16px 12px;
-        }
-
-        .user-card {
-          padding: 24px;
-        }
-
-        .avatar {
-          width: 56px;
-          height: 56px;
-        }
-
-        .user-name {
-          font-size: 18px;
-        }
-
-        .theme-toggle {
-          bottom: 24px;
-          right: 24px;
-          width: 48px;
-          height: 48px;
-          font-size: 20px;
-        }
-
-        #talk-container {
-          padding: 16px;
-        }
-      }
-
-      /* 滚动条样式 */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: var(--bg-primary);
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: var(--text-secondary);
-      }
-    </style>
+    <!--样式文件-->
+    <link
+      rel="stylesheet"
+      href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css"
+    />
   </head>
   <body>
-    <div class="container">
-      <div class="user-card">
-        <div class="user-info">
-          <img src="https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg" alt="头像" class="avatar" />
-          <div class="user-details">
-            <div class="user-name">钟神秀</div>
-            <div class="user-bio">分享生活，记录点滴</div>
-          </div>
-        </div>
-      </div>
-      <div class="talk-container-wrapper">
-        <div id="talk-container"></div>
-      </div>
-    </div>
-
-    <button class="theme-toggle" id="themeToggle" title="切换主题">
-      <span id="themeIcon">🌙</span>
-    </button>
-
+    ...
+    <!--显示内容的容器-->
+    <div id="talk-container"></div>
+    <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
     <script>
-      // 更新主题图标
-      function updateThemeIcon(theme, iconElement) {
-        if (iconElement) {
-          iconElement.textContent = theme === 'light' ? '🌙' : '☀️';
-        }
-      }
-
-      // 获取系统主题偏好
-      function getSystemTheme() {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-
-      // 动态加载 tgTalker 脚本（使用 unpkg CDN）
-      function loadTgTalkerScript() {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://unpkg.com/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js';
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('tgTalker 脚本加载失败，请检查网络连接'));
-          document.head.appendChild(script);
-        });
-      }
-
-      // 等待页面和所有资源加载完成
-      window.onload = async function() {
-        try {
-          // 动态加载 tgTalker
-          await loadTgTalkerScript();
-
-          // 主题切换功能
-          const themeToggle = document.getElementById('themeToggle');
-          const themeIcon = document.getElementById('themeIcon');
-          const html = document.documentElement;
-
-          if (!themeToggle || !themeIcon) {
-            console.error('主题切换所需的元素未找到');
-            return;
-          }
-
-          const savedTheme = localStorage.getItem('theme') || getSystemTheme();
-          html.setAttribute('data-theme', savedTheme);
-          updateThemeIcon(savedTheme, themeIcon);
-
-          const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-          const handleSystemThemeChange = (e) => {
-            html.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-            updateThemeIcon(e.matches ? 'dark' : 'light', themeIcon);
-          };
-
-          if (!localStorage.getItem('theme')) {
-            systemThemeQuery.addEventListener('change', handleSystemThemeChange);
-          }
-
-          themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme, themeIcon);
-
-            systemThemeQuery.removeEventListener('change', handleSystemThemeChange);
-          });
-
-          // 初始化 tgTalker
-          if (typeof tgTalker !== 'undefined') {
-            const talker = new tgTalker({
-              serverUrl: "https://tg-api.mcyzsx.top",
-              selector: "#talk-container",
-              zoom: true,
-              defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
+      const talker = new tgTalker({
+        serverUrl: "https://tg-api.mcyzsx.top", // API
+        selector: "#talk-container", // 显示内容的容器
+        zoom: true, // 是否启用图片缩放
+                      defaultAvatar: "https://imgbed.mcyzsx.top/file/avatar/1765626136745_zsxcoder.jpg",
               defaultName: "钟神秀",
               custom: {
                 proxy: {
@@ -306,16 +30,8 @@
                   enable: false,
                 },
               },
-            });
-            talker.init();
-            console.log('tgTalker 初始化成功');
-          } else {
-            console.error('tgTalker 未正确加载');
-          }
-        } catch (error) {
-          console.error('初始化过程中发生错误:', error);
-        }
-      };
+      });
+      talker.init(); // 在容器中注入 talker
     </script>
   </body>
 </html>

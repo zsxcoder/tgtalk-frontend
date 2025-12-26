@@ -99,9 +99,8 @@ body {
 #talk-container img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
-  display: block;
-  margin: 8px 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
 #talk-container a {

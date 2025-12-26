@@ -1,39 +1,17 @@
-<!doctype html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZSX Moments</title>
+    <link rel="stylesheet" href="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/style.css" />
   </head>
   <body>
-    <!-- 创建挂载容器 -->
     <div id="talk-container"></div>
-    
-    <!-- 1. 保留原来的 main.js，它会将 tgTalker 挂载到 window 对象上 -->
-    <script type="module" src="/src/main.js"></script>
-    
-    <!-- 2. 在 main.js 加载后，使用 tgTalker（必须使用 type="module"） -->
-    <script type="module">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://registry.npmmirror.com/@floatsheep/tg-talker/latest/files/dist/tgTalker.umd.js"></script>
+    <script>
       const talker = new tgTalker({
         serverUrl: "https://tg-api.mcyzsx.top",
         selector: "#talk-container",
         zoom: true,
-        custom: {
-          proxy: {
-            proxyUrl: "https://tg-api.mcyzsx.top",
-            image: true,
-          },
-          emaction: {
-            enable: true,
-            endpoint: "https://api-emaction.mcyzsx.top",
-            theme: "system",
-            availableArrayString: "",
-            threeDimensional: false,
-          },
-        },
       });
-      
       talker.init();
     </script>
   </body>

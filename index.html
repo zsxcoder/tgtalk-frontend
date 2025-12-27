@@ -972,6 +972,41 @@
             gallery.innerHTML = imagesArray.map(src => `<img src="${src}" alt="image">`).join('');
             document.body.appendChild(gallery);
             
+            // 保存当前的 body 样式
+            const savedBodyStyles = {
+              overflow: document.body.style.overflow,
+              position: document.body.style.position,
+              top: document.body.style.top,
+              left: document.body.style.left,
+              right: document.body.style.right,
+              bottom: document.body.style.bottom
+            };
+            
+            // 清理函数
+            const cleanupViewer = function() {
+              // 恢复 body 样式
+              document.body.style.overflow = '';
+              document.body.style.position = '';
+              document.body.style.top = '';
+              document.body.style.left = '';
+              document.body.style.right = '';
+              document.body.style.bottom = '';
+              
+              // 移除所有 viewer 相关的类
+              document.body.classList.remove('viewer-open');
+              
+              // 移除 gallery
+              setTimeout(function() {
+                if (gallery && gallery.parentNode) {
+                  gallery.parentNode.removeChild(gallery);
+                }
+                if (window.currentViewer) {
+                  window.currentViewer.destroy();
+                  window.currentViewer = null;
+                }
+              }, 300);
+            };
+            
             // 使用 hide 回调在初始化时设置，这是 viewer.js 的正确方式
             window.currentViewer = new Viewer(gallery, {
               initialViewIndex: currentIndex,
@@ -998,13 +1033,8 @@
               transition: true,
               fullscreen: true,
               loop: true,
-              hidden: function() {
-                setTimeout(function() {
-                  if (gallery && gallery.parentNode) {
-                    gallery.parentNode.removeChild(gallery);
-                  }
-                }, 300);
-              }
+              hidden: cleanupViewer,
+              hide: cleanupViewer
             });
             
             window.currentViewer.show();

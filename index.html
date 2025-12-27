@@ -297,21 +297,23 @@
         }
       }
 
-      /* Viewer.js 样式覆盖，确保灯箱正常工作 */
-      .viewer-container {
-        z-index: 99999 !important;
+      /* Fancybox 样式覆盖 */
+      .fancybox__container {
+        --fancybox-bg: rgba(0, 0, 0, 0.95);
+        --fancybox-color: #fff;
       }
 
-      .viewer-backdrop {
-        background-color: rgba(0, 0, 0, 0.95) !important;
+      .fancybox__toolbar {
+        background-color: rgba(0, 0, 0, 0.8) !important;
       }
 
-      .viewer-footer {
+      .fancybox__infobar {
         display: none !important;
       }
 
-      .viewer-toolbar {
-        background-color: rgba(0, 0, 0, 0.8) !important;
+      /* 隐藏默认的独立关闭按钮，只保留工具栏中的 */
+      .fancybox__container .is-close-btn {
+        display: none !important;
       }
 
       #talk-container .getMore {
@@ -504,12 +506,6 @@
         height: 24px;
         color: var(--text-primary);
         transition: all 0.3s ease;
-      }
-
-      /* Viewer.js 激活时隐藏主题切换按钮 */
-      body.viewer-open .theme-toggle {
-        opacity: 0;
-        pointer-events: none;
       }
 
       /* 滚动条样式 */
@@ -721,10 +717,10 @@
     <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/viewerjs@1.11.7/dist/viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/viewerjs@1.11.7/dist/viewer.min.css"
+      href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"
     />
     <script>
       // 主题切换功能
@@ -935,109 +931,90 @@
       // 初始化时调用
       setTimeout(addAvatarAndName, 1500);
 
-      // 手动初始化 viewer.js，用于图片灯箱放大
+      // 全局监听 Fancybox 关闭和销毁事件
+      Fancybox.bind('shouldClose', (fancybox) => {
+        // 移除焦点，避免 aria-hidden 警告
+        document.activeElement?.blur();
+        // 恢复页面滚动
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+      });
+
+      Fancybox.bind('destroy', (fancybox) => {
+        // 恢复页面滚动
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+      });
+
+      // 手动初始化 Fancybox，用于图片灯箱放大
       function initViewer() {
         // 为所有 talk-img 中的图片添加点击事件
         const talkImages = document.querySelectorAll('#talk-container .talk-img img');
         
         talkImages.forEach(function(img) {
           // 跳过已经绑定过事件的图片
-          if (img.hasAttribute('data-viewer-initialized')) {
+          if (img.hasAttribute('data-fancybox-initialized')) {
             return;
           }
           
           // 标记为已初始化
-          img.setAttribute('data-viewer-initialized', 'true');
+          img.setAttribute('data-fancybox-initialized', 'true');
           
           // 确保图片可点击
           img.style.cursor = 'zoom-in';
           
-          // 创建 viewer 实例
+          // 获取当前卡片中的所有图片
+          const parentPackage = img.closest('.talk-package');
+          const allImages = parentPackage.querySelectorAll('.talk-img img');
+          const imagesArray = Array.from(allImages).map(img => img.src);
+          
+          // 为每个图片添加 fancybox 绑定
           img.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            // 获取当前卡片中的所有图片
-            const parentPackage = this.closest('.talk-package');
-            const allImages = parentPackage.querySelectorAll('.talk-img img');
-            const imagesArray = Array.from(allImages).map(img => img.src);
-            const currentIndex = imagesArray.indexOf(this.src);
-            
-            // 创建或更新 viewer
-            if (window.currentViewer) {
-              window.currentViewer.destroy();
-            }
-            
-            const gallery = document.createElement('div');
-            gallery.style.display = 'none';
-            gallery.innerHTML = imagesArray.map(src => `<img src="${src}" alt="image">`).join('');
-            document.body.appendChild(gallery);
-            
-            // 保存当前的 body 样式
-            const savedBodyStyles = {
-              overflow: document.body.style.overflow,
-              position: document.body.style.position,
-              top: document.body.style.top,
-              left: document.body.style.left,
-              right: document.body.style.right,
-              bottom: document.body.style.bottom
-            };
-            
-            // 清理函数
-            const cleanupViewer = function() {
-              // 恢复 body 样式
-              document.body.style.overflow = '';
-              document.body.style.position = '';
-              document.body.style.top = '';
-              document.body.style.left = '';
-              document.body.style.right = '';
-              document.body.style.bottom = '';
-              
-              // 移除所有 viewer 相关的类
-              document.body.classList.remove('viewer-open');
-              
-              // 移除 gallery
-              setTimeout(function() {
-                if (gallery && gallery.parentNode) {
-                  gallery.parentNode.removeChild(gallery);
-                }
-                if (window.currentViewer) {
-                  window.currentViewer.destroy();
-                  window.currentViewer = null;
-                }
-              }, 300);
-            };
-            
-            // 使用 hide 回调在初始化时设置，这是 viewer.js 的正确方式
-            window.currentViewer = new Viewer(gallery, {
-              initialViewIndex: currentIndex,
-              toolbar: {
-                zoomIn: 1,
-                zoomOut: 1,
-                oneToOne: 1,
-                reset: 1,
-                prev: 1,
-                play: false,
-                next: 1,
-                rotateLeft: 1,
-                rotateRight: 1,
-                flipHorizontal: 1,
-                flipVertical: 1,
-              },
-              navbar: true,
-              title: false,
-              keyboard: true,
-              movable: true,
-              zoomable: true,
-              zoomOnWheel: true,
-              zoomOnTouch: true,
-              transition: true,
-              fullscreen: true,
-              loop: true,
-              hidden: cleanupViewer,
-              hide: cleanupViewer
-            });
-            
-            window.currentViewer.show();
+
+            // 找到当前图片的索引
+            const currentIndex = imagesArray.indexOf(img.src);
+
+            // 使用 Fancybox 打开图片
+            Fancybox.show(
+              imagesArray.map(src => ({ src, type: 'image' })),
+              {
+                startIndex: currentIndex,
+                // 关闭现有实例
+                closeExisting: true,
+                // 禁用默认关闭按钮（使用工具栏中的关闭按钮）
+                closeButton: false,
+                // 工具栏配置
+                Toolbar: {
+                  display: {
+                    left: ['infobar'],
+                    middle: [],
+                    right: ['slideshow', 'thumbs', 'close'],
+                  },
+                },
+                // 键盘控制
+                keyboard: {
+                  Escape: 'close',
+                  Delete: 'close',
+                  Backspace: 'close',
+                  PageUp: 'prev',
+                  PageDown: 'next',
+                  ArrowUp: 'prev',
+                  ArrowDown: 'next',
+                  ArrowLeft: 'prev',
+                  ArrowRight: 'next',
+                },
+                // 动画
+                animated: true,
+                transition: 'slide',
+                // 循环
+                loop: true,
+                // 缩放
+                zoom: true,
+                // 触摸支持
+                dragToClose: true,
+              }
+            );
           });
         });
       }
@@ -1055,26 +1032,6 @@
       });
 
       imageObserver.observe(document.getElementById('talk-container'), {
-        childList: true,
-        subtree: true
-      });
-
-      // 监听 viewer 事件，控制主题切换按钮显示/隐藏
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === 'childList') {
-            const viewerContainer = document.querySelector('.viewer-container');
-            if (viewerContainer) {
-              document.body.classList.add('viewer-open');
-            } else {
-              document.body.classList.remove('viewer-open');
-            }
-          }
-        });
-      });
-
-      // 监听 body 下的子元素变化
-      observer.observe(document.body, {
         childList: true,
         subtree: true
       });

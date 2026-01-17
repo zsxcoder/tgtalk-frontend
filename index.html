@@ -1019,9 +1019,13 @@
               commentContainer.style.display = 'block';
               commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> 收起评论';
               
-              // 确保talkId是字符串格式
-              const commentId = String(talkId || `comment-${Date.now()}`);
-              const containerId = `gitalk-container-${talkId}`;
+              // 生成唯一的评论ID，结合talkId和时间戳
+              const uniqueId = `${talkId || 'unknown'}-${Date.now()}`;
+              const commentId = uniqueId;
+              const containerId = `gitalk-container-${uniqueId}`;
+              
+              // 更新评论容器的ID，确保每次都是唯一的
+              commentContainer.innerHTML = `<div id="${containerId}"></div>`;
               
               // 创建新的Gitalk实例
               const gitalk = new Gitalk({
@@ -1038,15 +1042,10 @@
               });
               
               // 存储当前实例
-              window[`gitalk_${talkId}`] = gitalk;
+              window[`gitalk_${uniqueId}`] = gitalk;
               
               // 尝试渲染，如果失败则隐藏评论区
               try {
-                // 清空容器内容，确保每次渲染都是新的实例
-                const container = document.getElementById(containerId);
-                if (container) {
-                  container.innerHTML = '';
-                }
                 gitalk.render(containerId);
               } catch (error) {
                 console.error('Gitalk render error:', error);

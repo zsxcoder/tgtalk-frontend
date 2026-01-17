@@ -1019,33 +1019,49 @@
               commentContainer.style.display = 'block';
               commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> 收起评论';
               
-              // 初始化Gitalk
-              if (!window[`gitalk_${talkId}`]) {
-                // 确保talkId是字符串格式
-                const commentId = String(talkId || `comment-${Date.now()}`);
-                
-                const gitalk = new Gitalk({
-                  clientID: 'Ov23liUvojXjak6MtJfF',
-                  clientSecret: '551d03bed624a097055d247c09ede576323c51da',
-                  repo: 'tgtalk-comments',
-                  owner: 'zsxcoder',
-                  admin: ['zsxcoder'],
-                  id: commentId,
-                  title: `Comment for talk ${commentId}`, // 添加title字段
-                  body: 'Initial comment thread', // 添加body字段
-                  distractionFreeMode: false,
-                  theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
-                });
-                window[`gitalk_${talkId}`] = gitalk;
-                
-                // 尝试渲染，如果失败则隐藏评论区
+              // 确保talkId是字符串格式
+              const commentId = String(talkId || `comment-${Date.now()}`);
+              const containerId = `gitalk-container-${talkId}`;
+              
+              // 先销毁之前可能存在的Gitalk实例
+              if (window.currentGitalkInstance) {
                 try {
-                  gitalk.render(`gitalk-container-${talkId}`);
+                  window.currentGitalkInstance.destroy();
                 } catch (error) {
-                  console.error('Gitalk render error:', error);
-                  commentContainer.style.display = 'none';
-                  commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
+                  console.error('Gitalk destroy error:', error);
                 }
+              }
+              
+              // 创建新的Gitalk实例
+              const gitalk = new Gitalk({
+                clientID: 'Ov23liUvojXjak6MtJfF',
+                clientSecret: '551d03bed624a097055d247c09ede576323c51da',
+                repo: 'tgtalk-comments',
+                owner: 'zsxcoder',
+                admin: ['zsxcoder'],
+                id: commentId,
+                title: `Comment for talk ${commentId}`,
+                body: 'Initial comment thread',
+                distractionFreeMode: false,
+                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+              });
+              
+              // 存储当前实例
+              window.currentGitalkInstance = gitalk;
+              window[`gitalk_${talkId}`] = gitalk;
+              
+              // 尝试渲染，如果失败则隐藏评论区
+              try {
+                // 清空容器内容，确保每次渲染都是新的实例
+                const container = document.getElementById(containerId);
+                if (container) {
+                  container.innerHTML = '';
+                }
+                gitalk.render(containerId);
+              } catch (error) {
+                console.error('Gitalk render error:', error);
+                commentContainer.style.display = 'none';
+                commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
               }
             } else {
               commentContainer.style.display = 'none';

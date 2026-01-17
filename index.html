@@ -1023,15 +1023,6 @@
               const commentId = String(talkId || `comment-${Date.now()}`);
               const containerId = `gitalk-container-${talkId}`;
               
-              // 先销毁之前可能存在的Gitalk实例
-              if (window.currentGitalkInstance) {
-                try {
-                  window.currentGitalkInstance.destroy();
-                } catch (error) {
-                  console.error('Gitalk destroy error:', error);
-                }
-              }
-              
               // 创建新的Gitalk实例
               const gitalk = new Gitalk({
                 clientID: 'Ov23liUvojXjak6MtJfF',
@@ -1047,7 +1038,6 @@
               });
               
               // 存储当前实例
-              window.currentGitalkInstance = gitalk;
               window[`gitalk_${talkId}`] = gitalk;
               
               // 尝试渲染，如果失败则隐藏评论区

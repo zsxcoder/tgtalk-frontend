@@ -497,6 +497,77 @@
         color: var(--text-primary);
         transition: all 0.3s ease;
       }
+      
+      /* 评论按钮样式 */
+      .talk-comment-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 0;
+        padding: 6px 12px;
+        background-color: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+      
+      .talk-comment-btn:hover {
+        background-color: var(--accent-color);
+        color: #fff;
+        border-color: var(--accent-color);
+        transform: translateY(-1px);
+      }
+      
+      .talk-comment-btn:active {
+        transform: translateY(0);
+      }
+      
+      /* 评论容器样式 */
+      .talk-comment-container {
+        margin-top: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-card);
+        padding: 16px;
+        background-color: var(--bg-card);
+        transition: all 0.3s ease;
+      }
+      
+      /* Gitalk 适配样式 */
+      .gitalk-container {
+        font-family: inherit;
+      }
+      
+      /* 适配明暗模式 */
+      html[data-theme="dark"] .gitalk-container {
+        --color-text-primary: #e6edf3;
+        --color-text-secondary: #8b949e;
+        --color-bg-primary: #161b22;
+        --color-bg-secondary: #21262d;
+        --color-border: #30363d;
+      }
+      
+      /* 移动端评论样式 */
+      @media (max-width: 768px) {
+        .talk-comment-btn {
+          margin-top: 0;
+          padding: 5px 10px;
+          font-size: 12px;
+        }
+        
+        .talk-comment-container {
+          margin-top: 10px;
+          padding: 12px;
+        }
+        
+        /* 移动端操作容器样式 */
+        .talk-actions-container {
+          gap: 8px;
+        }
+      }
 
       /* 滚动条样式 */
       ::-webkit-scrollbar {
@@ -709,6 +780,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js"></script>
     <!-- MediumZoom 灯箱库 -->
     <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
+    <!-- Gitalk 评论插件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
     <script>
       // 主题切换功能
       (function() {
@@ -753,6 +827,16 @@
           const currentTheme = document.documentElement.getAttribute('data-theme');
           const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
           setTheme(newTheme);
+          
+          // 更新所有已初始化的Gitalk主题
+          for (const key in window) {
+            if (key.startsWith('gitalk_')) {
+              const gitalk = window[key];
+              if (gitalk && gitalk.changeTheme) {
+                gitalk.changeTheme(newTheme);
+              }
+            }
+          }
         });
       })();
 
@@ -900,7 +984,61 @@
             innerContent.appendChild(tagsContainer);
           }
           
-          if (emactionEl) innerContent.appendChild(emactionEl);
+          // 创建操作容器，用于放置表情按钮和评论按钮
+          const actionContainer = document.createElement('div');
+          actionContainer.className = 'talk-actions-container';
+          actionContainer.style.display = 'flex';
+          actionContainer.style.justifyContent = 'space-between';
+          actionContainer.style.alignItems = 'center';
+          actionContainer.style.width = '100%';
+          
+          // 添加表情按钮
+          if (emactionEl) {
+            actionContainer.appendChild(emactionEl);
+          }
+          
+          // 创建评论按钮
+          const commentButton = document.createElement('button');
+          commentButton.className = 'talk-comment-btn';
+          commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
+          actionContainer.appendChild(commentButton);
+          
+          // 将操作容器添加到内部内容容器
+          innerContent.appendChild(actionContainer);
+
+          // 创建评论容器
+          const commentContainer = document.createElement('div');
+          commentContainer.className = 'talk-comment-container';
+          commentContainer.style.display = 'none';
+          commentContainer.innerHTML = `<div id="gitalk-container-${talkId}"></div>`;
+          innerContent.appendChild(commentContainer);
+
+          // 实现评论按钮点击事件
+          commentButton.addEventListener('click', function() {
+            if (commentContainer.style.display === 'none') {
+              commentContainer.style.display = 'block';
+              commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> 收起评论';
+              
+              // 初始化Gitalk
+              if (!window[`gitalk_${talkId}`]) {
+                const gitalk = new Gitalk({
+                  clientID: 'Ov23liUvojXjak6MtJfF', // 替换为你的GitHub应用Client ID
+                  clientSecret: '551d03bed624a097055d247c09ede576323c51da', // 替换为你的GitHub应用Client Secret
+                  repo: 'tgtalk-comments', // 替换为你的GitHub仓库名
+                  owner: 'zsxcoder', // 替换为你的GitHub用户名
+                  admin: ['zsxcoder'], // 替换为你的GitHub用户名
+                  id: talkId, // 用说说ID作为评论ID
+                  distractionFreeMode: false, // 无干扰模式
+                  theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light' // 适配主题
+                });
+                window[`gitalk_${talkId}`] = gitalk;
+                gitalk.render(`gitalk-container-${talkId}`);
+              }
+            } else {
+              commentContainer.style.display = 'none';
+              commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
+            }
+          });
 
           // 将头像和内部内容添加到包装器
           contentWrapper.appendChild(avatar);

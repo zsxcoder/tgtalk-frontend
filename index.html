@@ -1044,12 +1044,13 @@
               // 存储当前实例
               window[`gitalk_${uniqueId}`] = gitalk;
               
-              // 尝试渲染，如果失败则隐藏评论区
+              // 尝试渲染，如果失败则显示友好提示
               try {
                 gitalk.render(containerId);
               } catch (error) {
                 console.error('Gitalk render error:', error);
-                commentContainer.style.display = 'none';
+                // 显示友好的错误提示，而不是直接隐藏
+                commentContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary);">评论功能暂时不可用，请稍后重试</div>';
                 commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
               }
             } else {

@@ -325,6 +325,24 @@
           opacity: 1 !important;
           z-index: 9999 !important;
         }
+        
+        /* 确保工具栏在移动端可见 */
+        .fancybox__toolbar {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+      
+      /* 确保Fancybox图片正确加载和显示 */
+      .fancybox__slide img {
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+      }
+      
+      /* 修复Fancybox关闭后页面滚动问题 */
+      .fancybox__container {
+        --fancybox-body-padding-right: 0 !important;
       }
 
       #talk-container .getMore {
@@ -942,30 +960,6 @@
       // 初始化时调用
       setTimeout(addAvatarAndName, 1500);
 
-      // 全局监听 Fancybox 事件，确保页面滚动正确恢复
-      Fancybox.bind('close', (fancybox) => {
-        // 移除焦点，避免 aria-hidden 警告
-        document.activeElement?.blur();
-        // 恢复页面滚动
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.paddingRight = '';
-      });
-
-      Fancybox.bind('destroy', (fancybox) => {
-        // 恢复页面滚动
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.paddingRight = '';
-      });
-
-      Fancybox.bind('afterClose', (fancybox) => {
-        // 确保在关闭后恢复所有页面滚动相关样式
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.paddingRight = '';
-      });
-
       // 手动初始化 Fancybox，用于图片灯箱放大
       function initViewer() {
         // 为所有 talk-img 中的图片添加点击事件
@@ -986,55 +980,128 @@
           // 获取当前卡片中的所有图片
           const parentPackage = img.closest('.talk-package');
           const allImages = parentPackage.querySelectorAll('.talk-img img');
-          const imagesArray = Array.from(allImages).map(img => img.src);
+          
+          // 构建图片数组，包含完整的图片信息
+          const imagesArray = Array.from(allImages).map(imgEl => ({
+            src: imgEl.src,
+            type: 'image',
+            caption: imgEl.alt || '',
+            thumb: imgEl.src // 使用原图作为缩略图
+          }));
           
           // 为每个图片添加 fancybox 绑定
           img.addEventListener('click', function(e) {
+            e.stopPropagation();
             e.preventDefault();
 
             // 找到当前图片的索引
-            const currentIndex = imagesArray.indexOf(img.src);
+            const currentIndex = imagesArray.findIndex(item => item.src === img.src);
+
+            // 保存原始的 body 和 html 样式
+            const originalBodyStyle = {
+              overflow: document.body.style.overflow,
+              position: document.body.style.position,
+              paddingRight: document.body.style.paddingRight
+            };
+            const originalHtmlStyle = {
+              overflow: document.documentElement.style.overflow,
+              position: document.documentElement.style.position
+            };
 
             // 使用 Fancybox 打开图片
-            Fancybox.show(
-              imagesArray.map(src => ({ src, type: 'image' })),
-              {
-                startIndex: currentIndex,
-                // 关闭现有实例
-                closeExisting: true,
-                // 禁用默认关闭按钮（使用工具栏中的关闭按钮）
-                closeButton: false,
-                // 工具栏配置
-                Toolbar: {
-                  display: {
-                    left: ['infobar'],
-                    middle: [],
-                    right: ['slideshow', 'thumbs', 'close'],
-                  },
+            Fancybox.show(imagesArray, {
+              startIndex: currentIndex,
+              // 关闭现有实例
+              closeExisting: true,
+              // 始终显示默认关闭按钮，确保移动端可见
+              closeButton: true,
+              // 工具栏配置
+              Toolbar: {
+                display: {
+                  left: ['infobar'],
+                  middle: [],
+                  right: ['slideshow', 'thumbs', 'close'],
                 },
-                // 键盘控制
-                keyboard: {
-                  Escape: 'close',
-                  Delete: 'close',
-                  Backspace: 'close',
-                  PageUp: 'prev',
-                  PageDown: 'next',
-                  ArrowUp: 'prev',
-                  ArrowDown: 'next',
-                  ArrowLeft: 'prev',
-                  ArrowRight: 'next',
+              },
+              // 键盘控制
+              keyboard: {
+                Escape: 'close',
+                Delete: 'close',
+                Backspace: 'close',
+                PageUp: 'prev',
+                PageDown: 'next',
+                ArrowUp: 'prev',
+                ArrowDown: 'next',
+                ArrowLeft: 'prev',
+                ArrowRight: 'next',
+              },
+              // 动画
+              animated: true,
+              transition: 'slide',
+              // 循环
+              loop: true,
+              // 缩放
+              zoom: true,
+              // 触摸支持
+              dragToClose: true,
+              // 确保图片加载正确
+              image: {
+                preload: true,
+                protect: false,
+                fit: 'contain' // 确保图片正确适应容器
+              },
+              // 禁用 Fancybox 自动添加的 body 样式
+              preventScrollOnClose: false,
+              // 事件处理
+              on: {
+                // 关闭前事件
+                beforeClose: (fancybox) => {
+                  // 移除焦点，避免 aria-hidden 警告
+                  document.activeElement?.blur();
                 },
-                // 动画
-                animated: true,
-                transition: 'slide',
-                // 循环
-                loop: true,
-                // 缩放
-                zoom: true,
-                // 触摸支持
-                dragToClose: true,
+                // 关闭事件
+                close: (fancybox) => {
+                  // 立即恢复页面滚动
+                  document.body.style.overflow = originalBodyStyle.overflow;
+                  document.body.style.position = originalBodyStyle.position;
+                  document.body.style.paddingRight = originalBodyStyle.paddingRight;
+                  document.documentElement.style.overflow = originalHtmlStyle.overflow;
+                  document.documentElement.style.position = originalHtmlStyle.position;
+                },
+                // 销毁事件
+                destroy: (fancybox) => {
+                  // 强制恢复页面滚动
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
+                  document.body.style.position = '';
+                  document.documentElement.style.position = '';
+                  document.body.style.paddingRight = '';
+                },
+                // 关闭后事件
+                afterClose: (fancybox) => {
+                  // 最终确保恢复所有样式
+                  document.body.style.overflow = '';
+                  document.documentElement.style.overflow = '';
+                  document.body.style.position = '';
+                  document.documentElement.style.position = '';
+                  document.body.style.paddingRight = '';
+                  // 触发窗口调整事件，确保布局正确
+                  window.dispatchEvent(new Event('resize'));
+                  // 触发滚动事件，确保页面滚动状态正确
+                  window.dispatchEvent(new Event('scroll'));
+                },
+                // 图片加载完成事件
+                imageLoad: (fancybox, slide) => {
+                  // 确保图片正确显示
+                  const img = slide.$content.querySelector('img');
+                  if (img) {
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    img.style.objectFit = 'contain';
+                  }
+                }
               }
-            );
+            });
           });
         });
       }

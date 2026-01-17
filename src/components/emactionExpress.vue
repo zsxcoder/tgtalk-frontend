@@ -20,9 +20,9 @@
             display: flex;
             align-self: center;
             border-radius: 800px;
-            width: 1rem;
-            height: 1rem;
-            line-height: 1rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            line-height: 1.25rem;
             padding: 0.25rem;
           "
           :style="startSmileStyle"
@@ -30,8 +30,8 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
-            width="1rem"
-            height="1rem"
+            width="1.25rem"
+            height="1.25rem"
             id="start-smile-svg"
             style="cursor: pointer"
             :style="startSmileSvgStyle"

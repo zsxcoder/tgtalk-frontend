@@ -1069,6 +1069,29 @@
       // 额外增加几次调用，确保所有.talk-package元素都能被处理
       setTimeout(addAvatarAndName, 2500);
       setTimeout(addAvatarAndName, 3500);
+      
+      // 添加DOM监听，当有新的说说元素添加时自动调用addAvatarAndName
+      const talkContainer = document.getElementById('talk-container');
+      if (talkContainer) {
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length > 0) {
+              // 检查是否有新的.talk-package元素被添加
+              const addedPackages = Array.from(mutation.addedNodes)
+                .filter(node => node.classList && node.classList.contains('talk-package'));
+              if (addedPackages.length > 0) {
+                // 延迟调用，确保元素已经完全渲染
+                setTimeout(addAvatarAndName, 100);
+              }
+            }
+          });
+        });
+        
+        observer.observe(talkContainer, {
+          childList: true,
+          subtree: true
+        });
+      }
 
       // 手动初始化 MediumZoom，用于图片灯箱放大
       function initViewer() {
@@ -1250,13 +1273,19 @@
       
       // 初始化全局Gitalk实例
       function initGlobalGitalk() {
-        // 检查是否已初始化
-        if (window.globalGitalk) {
+        // 确保容器存在
+        const container = document.getElementById('global-gitalk-container');
+        if (!container) {
+          console.error('Gitalk container not found');
           return;
         }
         
-        // 创建Gitalk实例
-        const gitalk = new Gitalk({
+        // 重置容器内容
+        container.innerHTML = '';
+        
+        // 无论之前是否已初始化，都重新创建Gitalk实例
+        // 这确保了刷新后能正确重新初始化
+        window.globalGitalk = new Gitalk({
           clientID: 'Ov23liUvojXjak6MtJfF',
           clientSecret: '551d03bed624a097055d247c09ede576323c51da',
           repo: 'tgtalk-comments',
@@ -1268,18 +1297,12 @@
           theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
         });
         
-        // 存储全局实例
-        window.globalGitalk = gitalk;
-        
         // 渲染评论区
         try {
-          gitalk.render('global-gitalk-container');
+          window.globalGitalk.render('global-gitalk-container');
         } catch (error) {
           console.error('Gitalk render error:', error);
-          const container = document.getElementById('global-gitalk-container');
-          if (container) {
-            container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary);">评论功能暂时不可用，请稍后重试</div>';
-          }
+          container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary);">评论功能暂时不可用，请稍后重试</div>';
         }
       }
 

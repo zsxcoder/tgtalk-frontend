@@ -901,9 +901,9 @@
 
       // 动态添加头像和名称
       function addAvatarAndName() {
-        console.log('addAvatarAndName called');
-        const packages = document.querySelectorAll('#talk-container .talk-package:not(.has-avatar)');
-        console.log('Found packages:', packages.length);
+  console.log('addAvatarAndName called');
+  const packages = document.querySelectorAll('#talk-wrapper .talk-package:not(.has-avatar)');
+  console.log('Found packages:', packages.length);
 
         packages.forEach(function(pkg, index) {
           // 获取说说 ID，确保总是有一个唯一标识符
@@ -1073,7 +1073,7 @@
       // 手动初始化 MediumZoom，用于图片灯箱放大
       function initViewer() {
         // 为所有 talk-img 中的图片添加 MediumZoom 功能
-        const talkImages = document.querySelectorAll('#talk-container .talk-img img');
+        const talkImages = document.querySelectorAll('#talk-wrapper .talk-img img');
         
         talkImages.forEach(function(img) {
           // 跳过已经绑定过事件的图片
@@ -1112,7 +1112,7 @@
         }, 500);
       });
 
-      imageObserver.observe(document.getElementById('talk-container'), {
+      imageObserver.observe(document.getElementById('talk-wrapper'), {
         childList: true,
         subtree: true,
         attributes: true, // 监听属性变化
@@ -1163,7 +1163,7 @@
       let lastTotalPages = 0;
 
       function implementPagination() {
-        const packages = document.querySelectorAll('#talk-container .talk-package');
+        const packages = document.querySelectorAll('#talk-wrapper .talk-package');
         const totalPages = Math.ceil(packages.length / itemsPerPage);
 
         // 只在页面数量变化时更新分页
@@ -1177,7 +1177,7 @@
         if (!pagination) {
           pagination = document.createElement('div');
           pagination.id = 'pagination';
-          document.getElementById('talk-container').appendChild(pagination);
+          document.getElementById('talk-wrapper').appendChild(pagination);
           paginationCreated = true;
         }
 
@@ -1241,7 +1241,7 @@
           pagination.parentNode.insertBefore(commentSection, pagination.nextSibling);
         } else {
           // 如果分页不存在，直接添加到容器末尾
-          document.getElementById('talk-container').appendChild(commentSection);
+          document.getElementById('talk-wrapper').appendChild(commentSection);
         }
         
         // 初始化全局Gitalk实例

@@ -828,26 +828,18 @@
           const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
           setTheme(newTheme);
           
-          // 更新所有已初始化的Gitalk主题
-          for (const key in window) {
-            if (key.startsWith('gitalk_')) {
-              const gitalk = window[key];
-              if (gitalk) {
-                // Gitalk 1.x 版本没有 changeTheme 方法，需要重新创建实例或更新 DOM
-                // 移除旧实例
-                const containerId = key.replace('gitalk_', 'gitalk-container-');
-                const container = document.getElementById(containerId);
-                if (container) {
-                  container.innerHTML = '';
-                  
-                  // 使用新主题重新渲染
-                  try {
-                    gitalk.theme = newTheme;
-                    gitalk.render(containerId);
-                  } catch (error) {
-                    console.error('Failed to re-render Gitalk with new theme:', error);
-                  }
-                }
+          // 更新全局Gitalk实例主题
+          if (window.globalGitalk) {
+            const container = document.getElementById('global-gitalk-container');
+            if (container) {
+              container.innerHTML = '';
+              
+              // 使用新主题重新渲染
+              try {
+                window.globalGitalk.theme = newTheme;
+                window.globalGitalk.render('global-gitalk-container');
+              } catch (error) {
+                console.error('Failed to re-render Gitalk with new theme:', error);
               }
             }
           }
@@ -1025,75 +1017,39 @@
           commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
           actionContainer.appendChild(commentButton);
           
-          // 将操作容器添加到内部内容容器
-          innerContent.appendChild(actionContainer);
+          // 获取说说文本内容，用于引用
+          const talkText = textEl ? textEl.textContent.trim() : '';
           
-          // 创建评论容器
-          const commentContainer = document.createElement('div');
-          commentContainer.className = 'talk-comment-container';
-          commentContainer.style.display = 'none';
-          commentContainer.style.overflow = 'hidden';
-          commentContainer.style.transition = 'all 0.3s ease';
-          commentContainer.style.maxHeight = '0';
-          commentContainer.style.opacity = '0';
-          
-          // 使用稳定的talkId作为gitalk容器ID
-          const containerId = `gitalk-container-${talkId}`;
-          commentContainer.innerHTML = `<div id="${containerId}" class="gitalk-container"></div>`;
-          innerContent.appendChild(commentContainer);
-          
-          // 实现评论按钮点击事件
+          // 实现评论按钮点击事件 - 跳转到页底评论区
           commentButton.addEventListener('click', function() {
-            if (commentContainer.style.display === 'none' || commentContainer.style.maxHeight === '0px') {
-              // 展开评论区
-              commentContainer.style.display = 'block';
-              // 设置一个足够大的maxHeight来显示内容
-              commentContainer.style.maxHeight = '2000px';
-              commentContainer.style.opacity = '1';
-              commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> 收起评论';
-              
-              // 使用稳定的talkId作为gitalk的id，确保唯一性
-              const gitalkId = talkId;
-              
-              // 检查是否已经创建过gitalk实例
-              if (!window[`gitalk_${gitalkId}`]) {
-                // 创建新的Gitalk实例
-                const gitalk = new Gitalk({
-                  clientID: 'Ov23liUvojXjak6MtJfF',
-                  clientSecret: '551d03bed624a097055d247c09ede576323c51da',
-                  repo: 'tgtalk-comments',
-                  owner: 'zsxcoder',
-                  admin: ['zsxcoder'],
-                  id: gitalkId,
-                  title: `Comment for talk ${gitalkId}`,
-                  distractionFreeMode: false,
-                  theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
-                });
-                
-                // 存储当前实例
-                window[`gitalk_${gitalkId}`] = gitalk;
-                
-                // 尝试渲染，如果失败则显示友好提示
-                try {
-                  gitalk.render(containerId);
-                } catch (error) {
-                  console.error('Gitalk render error:', error);
-                  // 显示友好的错误提示
-                  commentContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary);">评论功能暂时不可用，请稍后重试</div>';
-                  commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
-                }
+            // 存储当前引用的说说内容
+            window.currentTalkQuote = talkText;
+            window.currentTalkId = talkId;
+            
+            // 更新评论区标题或引用提示
+            const commentSection = document.getElementById('global-comment-section');
+            if (commentSection) {
+              const quoteHint = commentSection.querySelector('.comment-quote-hint');
+              if (quoteHint) {
+                quoteHint.textContent = `正在评论: ${talkText.substring(0, 50)}${talkText.length > 50 ? '...' : ''}`;
               }
+            }
+            
+            // 平滑滚动到评论区
+            const commentsContainer = document.getElementById('global-gitalk-container');
+            if (commentsContainer) {
+              commentsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
-              // 折叠评论区
-              commentContainer.style.maxHeight = '0';
-              commentContainer.style.opacity = '0';
-              // 延迟隐藏，等待动画完成
-              setTimeout(() => {
-                commentContainer.style.display = 'none';
-              }, 300);
-              commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
+              // 如果评论区还没创建，先滚动到分页区域
+              const pagination = document.getElementById('pagination');
+              if (pagination) {
+                pagination.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              }
             }
           });
+          
+          // 将操作容器添加到内部内容容器
+          innerContent.appendChild(actionContainer);
 
           // 将头像和内部内容添加到包装器
           contentWrapper.appendChild(avatar);
@@ -1230,6 +1186,101 @@
 
         // 初始显示第一页
         showPage(currentPage);
+        
+        // 创建或更新全局评论区
+        createGlobalCommentSection();
+      }
+      
+      // 创建全局评论区
+      function createGlobalCommentSection() {
+        // 检查是否已存在评论区
+        let commentSection = document.getElementById('global-comment-section');
+        if (commentSection) {
+          return;
+        }
+        
+        // 创建评论区容器
+        commentSection = document.createElement('div');
+        commentSection.id = 'global-comment-section';
+        commentSection.style.margin = '40px 0 20px 0';
+        commentSection.style.padding = '20px';
+        commentSection.style.backgroundColor = 'var(--bg-card)';
+        commentSection.style.borderRadius = 'var(--radius-card)';
+        commentSection.style.boxShadow = 'var(--shadow-sm)';
+        commentSection.style.border = '1px solid var(--border-color)';
+        
+        // 添加评论区标题
+        const commentTitle = document.createElement('h3');
+        commentTitle.textContent = '评论区';
+        commentTitle.style.marginBottom = '16px';
+        commentTitle.style.fontSize = '18px';
+        commentTitle.style.fontWeight = '600';
+        commentSection.appendChild(commentTitle);
+        
+        // 添加引用提示
+        const quoteHint = document.createElement('div');
+        quoteHint.className = 'comment-quote-hint';
+        quoteHint.textContent = '点击上方说说的"评论"按钮开始评论';
+        quoteHint.style.marginBottom = '20px';
+        quoteHint.style.padding = '12px';
+        quoteHint.style.backgroundColor = 'var(--hover-bg)';
+        quoteHint.style.borderRadius = '8px';
+        quoteHint.style.fontSize = '14px';
+        quoteHint.style.color = 'var(--text-secondary)';
+        commentSection.appendChild(quoteHint);
+        
+        // 添加Gitalk容器
+        const gitalkContainer = document.createElement('div');
+        gitalkContainer.id = 'global-gitalk-container';
+        gitalkContainer.style.marginTop = '20px';
+        commentSection.appendChild(gitalkContainer);
+        
+        // 插入到分页之后
+        const pagination = document.getElementById('pagination');
+        if (pagination) {
+          pagination.parentNode.insertBefore(commentSection, pagination.nextSibling);
+        } else {
+          // 如果分页不存在，直接添加到容器末尾
+          document.getElementById('talk-container').appendChild(commentSection);
+        }
+        
+        // 初始化全局Gitalk实例
+        initGlobalGitalk();
+      }
+      
+      // 初始化全局Gitalk实例
+      function initGlobalGitalk() {
+        // 检查是否已初始化
+        if (window.globalGitalk) {
+          return;
+        }
+        
+        // 创建Gitalk实例
+        const gitalk = new Gitalk({
+          clientID: 'Ov23liUvojXjak6MtJfF',
+          clientSecret: '551d03bed624a097055d247c09ede576323c51da',
+          repo: 'tgtalk-comments',
+          owner: 'zsxcoder',
+          admin: ['zsxcoder'],
+          id: 'global-comments', // 全局共用一个ID
+          title: 'Global Comments',
+          distractionFreeMode: false,
+          theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+        });
+        
+        // 存储全局实例
+        window.globalGitalk = gitalk;
+        
+        // 渲染评论区
+        try {
+          gitalk.render('global-gitalk-container');
+        } catch (error) {
+          console.error('Gitalk render error:', error);
+          const container = document.getElementById('global-gitalk-container');
+          if (container) {
+            container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary);">评论功能暂时不可用，请稍后重试</div>';
+          }
+        }
       }
 
       function showPage(page) {
@@ -1359,6 +1410,13 @@
       setTimeout(function() {
         implementPagination();
       }, 2000);
+      
+      // 页面加载完成后初始化全局评论区（如果还未创建）
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          createGlobalCommentSection();
+        }, 3000);
+      });
 
       // 注册 Service Worker
       if ('serviceWorker' in navigator) {

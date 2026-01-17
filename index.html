@@ -1123,31 +1123,39 @@
 
       // 回到顶部按钮功能
       (function() {
-        const backToTopBtn = document.getElementById('backToTop');
-
-        // 滚动监听
-        function handleScroll() {
-          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          if (scrollTop > 300) {
-            backToTopBtn.classList.add('visible');
-          } else {
-            backToTopBtn.classList.remove('visible');
+        // 确保DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+          const backToTopBtn = document.getElementById('backToTop');
+          
+          // 检查按钮是否存在
+          if (!backToTopBtn) {
+            console.error('回到顶部按钮未找到');
+            return;
           }
-        }
 
-        // 点击回到顶部
-        backToTopBtn.addEventListener('click', function() {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
+          // 滚动监听
+          function handleScroll() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > 300) {
+              backToTopBtn.classList.add('visible');
+            } else {
+              backToTopBtn.classList.remove('visible');
+            }
+          }
+
+          // 点击回到顶部
+          backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           });
+
+          // 监听滚动事件
+          window.addEventListener('scroll', handleScroll);
+
+          // 初始化检查
+          handleScroll();
+          
+          console.log('回到顶部按钮功能已初始化');
         });
-
-        // 监听滚动事件
-        window.addEventListener('scroll', handleScroll);
-
-        // 初始化检查
-        handleScroll();
       })();
 
       // 分页功能

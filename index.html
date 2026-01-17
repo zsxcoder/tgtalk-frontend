@@ -895,11 +895,19 @@
 
       // 动态添加头像和名称
       function addAvatarAndName() {
+        console.log('addAvatarAndName called');
         const packages = document.querySelectorAll('#talk-container .talk-package:not(.has-avatar)');
+        console.log('Found packages:', packages.length);
 
-        packages.forEach(function(pkg) {
-          // 获取说说 ID
-          const talkId = pkg.dataset.id;
+        packages.forEach(function(pkg, index) {
+          // 获取说说 ID，确保总是有一个唯一标识符
+          let talkId = pkg.dataset.id;
+          if (!talkId) {
+            // 如果没有 data-id，生成一个基于时间和索引的唯一 ID
+            talkId = `talk-${Date.now()}-${index}`;
+            pkg.dataset.id = talkId;
+            console.log('Generated talkId:', talkId);
+          }
 
           // 获取时间元素
           const timeEl = pkg.querySelector('.talk-time');
@@ -1072,8 +1080,11 @@
         });
       }
 
-      // 初始化时调用
+      // 初始化时调用，增加调用频率以确保根路径下也能正常添加评论按钮
       setTimeout(addAvatarAndName, 1500);
+      // 额外增加几次调用，确保所有.talk-package元素都能被处理
+      setTimeout(addAvatarAndName, 2500);
+      setTimeout(addAvatarAndName, 3500);
 
       // 手动初始化 MediumZoom，用于图片灯箱放大
       function initViewer() {
@@ -1109,6 +1120,7 @@
 
       // 使用 MutationObserver 监听 DOM 变化，动态添加的图片也支持放大
       const imageObserver = new MutationObserver(function(mutations) {
+        console.log('MutationObserver triggered');
         initViewer();
         addAvatarAndName();
         setTimeout(function() {
@@ -1118,7 +1130,9 @@
 
       imageObserver.observe(document.getElementById('talk-container'), {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true, // 监听属性变化
+        characterData: true // 监听文本内容变化
       });
 
       // 回到顶部按钮功能

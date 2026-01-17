@@ -1021,18 +1021,31 @@
               
               // 初始化Gitalk
               if (!window[`gitalk_${talkId}`]) {
+                // 确保talkId是字符串格式
+                const commentId = String(talkId || `comment-${Date.now()}`);
+                
                 const gitalk = new Gitalk({
-                  clientID: 'Ov23liUvojXjak6MtJfF', // 替换为你的GitHub应用Client ID
-                  clientSecret: '551d03bed624a097055d247c09ede576323c51da', // 替换为你的GitHub应用Client Secret
-                  repo: 'tgtalk-comments', // 替换为你的GitHub仓库名
-                  owner: 'zsxcoder', // 替换为你的GitHub用户名
-                  admin: ['zsxcoder'], // 替换为你的GitHub用户名
-                  id: talkId, // 用说说ID作为评论ID
-                  distractionFreeMode: false, // 无干扰模式
-                  theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light' // 适配主题
+                  clientID: 'Ov23liUvojXjak6MtJfF',
+                  clientSecret: '551d03bed624a097055d247c09ede576323c51da',
+                  repo: 'tgtalk-comments',
+                  owner: 'zsxcoder',
+                  admin: ['zsxcoder'],
+                  id: commentId,
+                  title: `Comment for talk ${commentId}`, // 添加title字段
+                  body: 'Initial comment thread', // 添加body字段
+                  distractionFreeMode: false,
+                  theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
                 });
                 window[`gitalk_${talkId}`] = gitalk;
-                gitalk.render(`gitalk-container-${talkId}`);
+                
+                // 尝试渲染，如果失败则隐藏评论区
+                try {
+                  gitalk.render(`gitalk-container-${talkId}`);
+                } catch (error) {
+                  console.error('Gitalk render error:', error);
+                  commentContainer.style.display = 'none';
+                  commentButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 评论';
+                }
               }
             } else {
               commentContainer.style.display = 'none';

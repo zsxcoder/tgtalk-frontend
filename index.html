@@ -297,52 +297,13 @@
         }
       }
 
-      /* Fancybox 样式覆盖 */
-      .fancybox__container {
-        --fancybox-bg: rgba(0, 0, 0, 0.95);
-        --fancybox-color: #fff;
-      }
-
-      .fancybox__toolbar {
-        background-color: rgba(0, 0, 0, 0.8) !important;
-      }
-
-      .fancybox__infobar {
-        display: none !important;
-      }
-
-      /* 在桌面端隐藏默认的独立关闭按钮，只保留工具栏中的 */
-      @media (min-width: 769px) {
-        .fancybox__container .is-close-btn {
-          display: none !important;
-        }
-      }
-
-      /* 移动端确保关闭按钮可见 */
-      @media (max-width: 768px) {
-        .fancybox__container .is-close-btn {
-          display: block !important;
-          opacity: 1 !important;
-          z-index: 9999 !important;
-        }
-        
-        /* 确保工具栏在移动端可见 */
-        .fancybox__toolbar {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
+      /* MediumZoom 样式 */
+      .medium-zoom-overlay {
+        background-color: rgba(0, 0, 0, 0.95) !important;
       }
       
-      /* 确保Fancybox图片正确加载和显示 */
-      .fancybox__slide img {
-        max-width: 100% !important;
-        max-height: 100% !important;
-        object-fit: contain !important;
-      }
-      
-      /* 修复Fancybox关闭后页面滚动问题 */
-      .fancybox__container {
-        --fancybox-body-padding-right: 0 !important;
+      .medium-zoom-image {
+        background-color: transparent !important;
       }
 
       #talk-container .getMore {
@@ -503,10 +464,10 @@
       /* 主题切换按钮 */
       .theme-toggle {
         position: fixed;
-        bottom: 28px;
+        bottom: 90px;
         right: 28px;
-        width: 52px;
-        height: 52px;
+        width: 48px;
+        height: 48px;
         border-radius: var(--radius-button);
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -531,8 +492,8 @@
       }
 
       .theme-toggle svg {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
         color: var(--text-primary);
         transition: all 0.3s ease;
       }
@@ -636,15 +597,15 @@
 
         /* 移动端主题按钮 */
         .theme-toggle {
-          bottom: 16px;
+          bottom: 70px;
           right: 16px;
-          width: 48px;
-          height: 48px;
+          width: 44px;
+          height: 44px;
         }
 
         .theme-toggle svg {
-          width: 22px;
-          height: 22px;
+          width: 20px;
+          height: 20px;
         }
 
         /* 移动端加载更多按钮 */
@@ -699,15 +660,15 @@
 
         /* 小屏幕主题按钮 */
         .theme-toggle {
-          bottom: 12px;
+          bottom: 60px;
           right: 12px;
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
         }
 
         .theme-toggle svg {
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
         }
       }
 
@@ -746,11 +707,8 @@
     <!--为了显着减少包大小，我们没有将 vue 打包，因此您需要显式引用它-->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@floatsheep/tg-talker@latest/dist/tgTalker.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"
-    />
+    <!-- MediumZoom 灯箱库 -->
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
     <script>
       // 主题切换功能
       (function() {
@@ -960,148 +918,31 @@
       // 初始化时调用
       setTimeout(addAvatarAndName, 1500);
 
-      // 手动初始化 Fancybox，用于图片灯箱放大
+      // 手动初始化 MediumZoom，用于图片灯箱放大
       function initViewer() {
-        // 为所有 talk-img 中的图片添加点击事件
+        // 为所有 talk-img 中的图片添加 MediumZoom 功能
         const talkImages = document.querySelectorAll('#talk-container .talk-img img');
         
         talkImages.forEach(function(img) {
           // 跳过已经绑定过事件的图片
-          if (img.hasAttribute('data-fancybox-initialized')) {
+          if (img.hasAttribute('data-mediumzoom-initialized')) {
             return;
           }
           
           // 标记为已初始化
-          img.setAttribute('data-fancybox-initialized', 'true');
+          img.setAttribute('data-mediumzoom-initialized', 'true');
           
           // 确保图片可点击
           img.style.cursor = 'zoom-in';
           
-          // 获取当前卡片中的所有图片
-          const parentPackage = img.closest('.talk-package');
-          const allImages = parentPackage.querySelectorAll('.talk-img img');
-          
-          // 构建图片数组，包含完整的图片信息
-          const imagesArray = Array.from(allImages).map(imgEl => ({
-            src: imgEl.src,
-            type: 'image',
-            caption: imgEl.alt || '',
-            thumb: imgEl.src // 使用原图作为缩略图
-          }));
-          
-          // 为每个图片添加 fancybox 绑定
-          img.addEventListener('click', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-
-            // 找到当前图片的索引
-            const currentIndex = imagesArray.findIndex(item => item.src === img.src);
-
-            // 保存原始的 body 和 html 样式
-            const originalBodyStyle = {
-              overflow: document.body.style.overflow,
-              position: document.body.style.position,
-              paddingRight: document.body.style.paddingRight
-            };
-            const originalHtmlStyle = {
-              overflow: document.documentElement.style.overflow,
-              position: document.documentElement.style.position
-            };
-
-            // 使用 Fancybox 打开图片
-            Fancybox.show(imagesArray, {
-              startIndex: currentIndex,
-              // 关闭现有实例
-              closeExisting: true,
-              // 始终显示默认关闭按钮，确保移动端可见
-              closeButton: true,
-              // 工具栏配置
-              Toolbar: {
-                display: {
-                  left: ['infobar'],
-                  middle: [],
-                  right: ['slideshow', 'thumbs', 'close'],
-                },
-              },
-              // 键盘控制
-              keyboard: {
-                Escape: 'close',
-                Delete: 'close',
-                Backspace: 'close',
-                PageUp: 'prev',
-                PageDown: 'next',
-                ArrowUp: 'prev',
-                ArrowDown: 'next',
-                ArrowLeft: 'prev',
-                ArrowRight: 'next',
-              },
-              // 动画
-              animated: true,
-              transition: 'slide',
-              // 循环
-              loop: true,
-              // 缩放
-              zoom: true,
-              // 触摸支持
-              dragToClose: true,
-              // 确保图片加载正确
-              image: {
-                preload: true,
-                protect: false,
-                fit: 'contain' // 确保图片正确适应容器
-              },
-              // 禁用 Fancybox 自动添加的 body 样式
-              preventScrollOnClose: false,
-              // 事件处理
-              on: {
-                // 关闭前事件
-                beforeClose: (fancybox) => {
-                  // 移除焦点，避免 aria-hidden 警告
-                  document.activeElement?.blur();
-                },
-                // 关闭事件
-                close: (fancybox) => {
-                  // 立即恢复页面滚动
-                  document.body.style.overflow = originalBodyStyle.overflow;
-                  document.body.style.position = originalBodyStyle.position;
-                  document.body.style.paddingRight = originalBodyStyle.paddingRight;
-                  document.documentElement.style.overflow = originalHtmlStyle.overflow;
-                  document.documentElement.style.position = originalHtmlStyle.position;
-                },
-                // 销毁事件
-                destroy: (fancybox) => {
-                  // 强制恢复页面滚动
-                  document.body.style.overflow = '';
-                  document.documentElement.style.overflow = '';
-                  document.body.style.position = '';
-                  document.documentElement.style.position = '';
-                  document.body.style.paddingRight = '';
-                },
-                // 关闭后事件
-                afterClose: (fancybox) => {
-                  // 最终确保恢复所有样式
-                  document.body.style.overflow = '';
-                  document.documentElement.style.overflow = '';
-                  document.body.style.position = '';
-                  document.documentElement.style.position = '';
-                  document.body.style.paddingRight = '';
-                  // 触发窗口调整事件，确保布局正确
-                  window.dispatchEvent(new Event('resize'));
-                  // 触发滚动事件，确保页面滚动状态正确
-                  window.dispatchEvent(new Event('scroll'));
-                },
-                // 图片加载完成事件
-                imageLoad: (fancybox, slide) => {
-                  // 确保图片正确显示
-                  const img = slide.$content.querySelector('img');
-                  if (img) {
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '100%';
-                    img.style.objectFit = 'contain';
-                  }
-                }
-              }
-            });
+          // 为图片添加 MediumZoom 功能
+          mediumZoom(img, {
+            margin: 24,
+            background: 'rgba(0, 0, 0, 0.95)',
+            zoomMargin: 0,
+            scrollOffset: 40,
+            container: null,
+            template: null
           });
         });
       }
@@ -1155,17 +996,26 @@
       // 分页功能
       let currentPage = 1;
       const itemsPerPage = 10;
+      let paginationCreated = false;
+      let lastTotalPages = 0;
 
       function implementPagination() {
         const packages = document.querySelectorAll('#talk-container .talk-package');
         const totalPages = Math.ceil(packages.length / itemsPerPage);
 
-        // 只在第一次或元素数量变化时创建分页
+        // 只在页面数量变化时更新分页
+        if (totalPages === lastTotalPages) {
+          return;
+        }
+        lastTotalPages = totalPages;
+
+        // 只在第一次创建分页容器
         let pagination = document.getElementById('pagination');
         if (!pagination) {
           pagination = document.createElement('div');
           pagination.id = 'pagination';
           document.getElementById('talk-container').appendChild(pagination);
+          paginationCreated = true;
         }
 
         // 更新分页按钮
@@ -1201,14 +1051,21 @@
         pagination.style.flexWrap = 'wrap';
         pagination.style.gap = '8px';
 
+        // 清空现有内容
         pagination.innerHTML = '';
 
+        // 创建按钮创建函数，避免重复代码
+        function createButton(text, disabled, onClick) {
+          const button = document.createElement('button');
+          button.textContent = text;
+          button.className = 'pagination-btn';
+          button.disabled = disabled;
+          button.addEventListener('click', onClick);
+          return button;
+        }
+
         // 上一页按钮
-        const prevBtn = document.createElement('button');
-        prevBtn.textContent = '上一页';
-        prevBtn.className = 'pagination-btn';
-        prevBtn.disabled = currentPage === 1;
-        prevBtn.addEventListener('click', function() {
+        const prevBtn = createButton('上一页', currentPage === 1, function() {
           if (currentPage > 1) {
             currentPage--;
             showPage(currentPage);
@@ -1220,27 +1077,20 @@
 
         // 页码按钮
         for (let i = 1; i <= totalPages; i++) {
-          const pageBtn = document.createElement('button');
-          pageBtn.textContent = i;
-          pageBtn.className = 'pagination-btn';
-          if (i === currentPage) {
-            pageBtn.classList.add('active');
-          }
-          pageBtn.addEventListener('click', function() {
+          const pageBtn = createButton(i, false, function() {
             currentPage = i;
             showPage(currentPage);
             updatePagination(totalPages);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           });
+          if (i === currentPage) {
+            pageBtn.classList.add('active');
+          }
           pagination.appendChild(pageBtn);
         }
 
         // 下一页按钮
-        const nextBtn = document.createElement('button');
-        nextBtn.textContent = '下一页';
-        nextBtn.className = 'pagination-btn';
-        nextBtn.disabled = currentPage === totalPages;
-        nextBtn.addEventListener('click', function() {
+        const nextBtn = createButton('下一页', currentPage === totalPages, function() {
           if (currentPage < totalPages) {
             currentPage++;
             showPage(currentPage);
